@@ -15,4 +15,6 @@ public class CartRequest {
     private Integer quantity;
 
     private Long product;
+
+    private Integer status;
 }

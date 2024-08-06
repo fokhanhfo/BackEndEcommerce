@@ -1,9 +1,11 @@
 package com.projectRestAPI.studensystem.dto.request;
 
+import com.projectRestAPI.studensystem.model.Cart;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,4 +22,6 @@ public class BillRequest {
 
     @NotBlank(message = "Địa chỉ không được để trống")
     private String address;
+
+    private List<CartRequest> cartRequests;
 }

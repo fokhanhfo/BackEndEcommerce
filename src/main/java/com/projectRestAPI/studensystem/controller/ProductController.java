@@ -3,6 +3,7 @@ package com.projectRestAPI.studensystem.controller;
 
 import com.projectRestAPI.studensystem.dto.request.ImageRequest;
 import com.projectRestAPI.studensystem.dto.request.ProductRequest;
+import com.projectRestAPI.studensystem.dto.request.UpdateStatusProductRequest;
 import com.projectRestAPI.studensystem.dto.response.ResponseObject;
 import com.projectRestAPI.studensystem.model.Category;
 import com.projectRestAPI.studensystem.model.Image;
@@ -28,7 +29,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/product")
-@CrossOrigin("http://localhost:3000")
 public class ProductController {
     @Autowired
     ProductService productService;
@@ -39,53 +39,33 @@ public class ProductController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> findAll(){
-        return new ResponseEntity<>(productService.findAll(),HttpStatus.OK);
+        return productService.getAll();
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<ResponseObject> getCount(){
+        return productService.getCount();
     }
 
     @PostMapping("/Add")
-    public ResponseEntity<?> add(@Valid @RequestBody ProductRequest productRequest, BindingResult bindingResult){
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(bindingResult.getFieldError().getDefaultMessage());
-        }
-        Product product = productConvert(productRequest);
-        if (product == null) {
-            return ResponseEntity.badRequest().body("Category sai");
-        }
-
-        return productService.createNew(product);
-//        List<Image> images = productRequest.getImages();
+    public ResponseEntity<?> add(@Valid @ModelAttribute ProductRequest productRequest){
+        return productService.addProduct(productRequest);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getId(@PathVariable Long id){
-        Optional<Product> product = productService.findById(id);
-        if(product.isEmpty()){
-            return new ResponseEntity<>(new ResponseObject("Fail", "Không tìm thấy id " + id, 1, null), HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(product,HttpStatus.OK);
+        return productService.getId(id);
     }
 
-    public Product productConvert(ProductRequest productRequest) {
-        Optional<Category> optionalCategory = categoryService.findById(productRequest.getCategory());
-        Category category = optionalCategory.orElse(null);
-        Product product = Product.builder()
-                .name(productRequest.getName())
-                .detail(productRequest.getDetail())
-                .price(productRequest.getPrice())
-                .quantity(productRequest.getQuantity())
-                .category(category)
-                .build();
-        List<Image> images = productRequest.getImages();
-        imageService.saveImages(images);
-        product.setImages(images);
-        return product;
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProduct(@PathVariable Long id,@Valid @RequestBody ProductRequest productRequest){
+        return productService.updateProduct(id,productRequest);
     }
 
-    private Image convertToImage(ImageRequest imageRequest) {
-        return Image.builder()
-                .name_Image(imageRequest.getName_Image())
-                .main_photo(imageRequest.getMain_photo())
-                .build();
+    @PutMapping("updateStatus/{id}")
+    public ResponseEntity<?> updateStatusProduct(@PathVariable Long id,@RequestBody Integer status){
+        return productService.updateStatus(id,status);
     }
+
 
 }

@@ -64,4 +64,5 @@ public class BaseServiceImpl<E extends BaseEntity,ID extends Serializable,R exte
         return repository.findAll();
     }
 
+
 }

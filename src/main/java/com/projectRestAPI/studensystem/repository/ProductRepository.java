@@ -10,13 +10,30 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Repository
 public interface ProductRepository extends BaseRepository<Product,Long> {
-    @Query("SELECT p.quantity FROM Product p WHERE p.id = ?1")
-    Integer findQuantityById(Long productId);
+    Boolean existsByName(String name);
 
-    @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId")
-    Page<Product> findProductByCategory(Pageable pageable, @Param("categoryId") Long categoryId);
+    @Query("SELECT p FROM Product p " +
+            "WHERE (:categoryId IS NULL OR p.category.id = :categoryId) " +
+            "AND (:priceGte IS NULL OR p.price >= :priceGte) " +
+            "AND (:priceLte IS NULL OR p.price <= :priceLte) " +
+            "AND (:search IS NULL OR p.name like %:search%)"+
+            "ORDER BY " +
+            "  CASE WHEN :sort = 'Price:ASC' THEN p.price END ASC, " +
+            "  CASE WHEN :sort = 'Price:DESC' THEN p.price END DESC")
+    Page<Product> findProducts(@Param("categoryId") Long categoryId,
+                               @Param("priceGte") BigDecimal priceGte,
+                               @Param("priceLte") BigDecimal priceLte,
+                               @Param("sort") String sort,
+                               @Param("search") String search,
+                               Pageable pageable);
+
+    @Query("select count(p.id) from Product p ")
+    Integer getCount();
 
     @Modifying
     @Transactional

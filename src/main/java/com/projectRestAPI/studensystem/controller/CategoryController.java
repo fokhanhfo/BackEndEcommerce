@@ -1,10 +1,13 @@
 package com.projectRestAPI.studensystem.controller;
 
+import com.projectRestAPI.studensystem.dto.request.CategoryRequest;
+import com.projectRestAPI.studensystem.dto.response.ResponseObject;
 import com.projectRestAPI.studensystem.model.Category;
 import com.projectRestAPI.studensystem.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,51 +21,60 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Category> add(@RequestBody Category category) {
-        if (categoryService.isCategoryExists(category.getName())) {
-            return new  ResponseEntity<Category>(category,HttpStatus.NOT_FOUND);
-        }
+    @GetMapping
 
-        // Nếu không trùng tên, lưu danh mục vào cơ sở dữ liệu
-        categoryService.createNew(category);
-        return new  ResponseEntity<Category>(category,HttpStatus.OK);
+
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/add")
+    public ResponseEntity<?> add(@RequestBody Category category) {
+        if(categoryService.isCategoryExists(category.getName())){
+            return new ResponseEntity<>(new ResponseObject("Error","Trùng tên danh mục",400,null),HttpStatus.BAD_REQUEST);
+        }
+        return categoryService.createNew(category);
     }
 
 
     @GetMapping("getAll")
-    public List<Category> getAllCategory(){
-        return categoryService.findAll();
+    public ResponseEntity<ResponseObject> getAllCategory(){
+        List<Category> categories = categoryService.findAll();
+        return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",200,categories),HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable Long id){
-        try{
-            Optional<Category> category=categoryService.findById(id);
-            if (category.isPresent()) {
-                return new ResponseEntity<>(category.get(), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }catch (NoSuchElementException e){
-            return new ResponseEntity<Category>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<ResponseObject> get(@PathVariable Long id){
+        Optional<Category> categoryOptional=categoryService.findById(id);
+        if (categoryOptional.isEmpty()) {
+            return new ResponseEntity<>(new ResponseObject("Error","Không tìm thấy danh mục",400,null),HttpStatus.BAD_REQUEST);
         }
+        Category category = categoryOptional.get();
+        return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",200,category),HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> update(@RequestBody Category category, @PathVariable Long id){
+    public ResponseEntity<ResponseObject> update(@RequestBody CategoryRequest categoryRequest, @PathVariable Long id){
         try{
+            if(categoryService.isCategoryExists(categoryRequest.getName())){
+                return new ResponseEntity<>(new ResponseObject("Error","Trùng tên danh mục",400,null),HttpStatus.BAD_REQUEST);
+            }
             Optional<Category> updateCategory=categoryService.findById(id);
-            categoryService.createNew(category);
-            return new ResponseEntity<>(HttpStatus.OK);
+            if (updateCategory.isEmpty()){
+                return new ResponseEntity<>(new ResponseObject("Error","Không tìm thấy danh mục",404,null),HttpStatus.NOT_FOUND);
+            }
+            Category category = updateCategory.get();
+            category.setName(categoryRequest.getName());
+            category.setDescription(categoryRequest.getDescription());
+            return categoryService.update(category);
         }catch (NoSuchElementException e){
-            return new ResponseEntity<Category>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ResponseObject("Error","Update không thành công",400,null),HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id){
-        categoryService.delete(id);
-        return "Deleted Category with id" +id;
+    public ResponseEntity<ResponseObject> delete(@PathVariable Long id){
+        try{
+            return categoryService.delete(id);
+        }catch (NoSuchElementException e){
+            return new ResponseEntity<>(new ResponseObject("Error","Không tìm thấy danh mục",400,null),HttpStatus.BAD_REQUEST);
+        }
     }
 }

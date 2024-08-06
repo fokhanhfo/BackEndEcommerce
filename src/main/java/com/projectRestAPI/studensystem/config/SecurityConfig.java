@@ -26,8 +26,13 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINTS ={
-            "/user/add","/auth/token" ,"/auth/introspect","/auth/logout"
+    private final String[] PUBLIC_POST_ENDPOINTS ={
+            "/user/add","/auth/token" ,"/auth/introspect","/auth/logout","/category/getAll"
+    };
+
+    private final String[] PUBLIC_GET_ENDPOINTS = {
+            "/category/getAll",
+            "/product/getAll"
     };
 
     @Autowired
@@ -35,15 +40,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request->
-                request.requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated());
-//        httpSecurity.authorizeHttpRequests(request ->
-//                request.anyRequest().permitAll());
+//        httpSecurity.authorizeHttpRequests(request->
+//                request.requestMatchers(HttpMethod.POST,PUBLIC_POST_ENDPOINTS).permitAll()
+//                        .requestMatchers(HttpMethod.GET,PUBLIC_GET_ENDPOINTS).permitAll()
+//                        .anyRequest().authenticated());
+        httpSecurity.authorizeHttpRequests(request ->
+                request.anyRequest().permitAll());
 
         httpSecurity.oauth2ResourceServer(oauth2->
                 oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
@@ -61,14 +68,6 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
-//    @Bean
-//    JwtDecoder jwtDecoder(){
-//        SecretKeySpec secretKeySpec =new SecretKeySpec(SIGNER_KEY.getBytes(),"HS512");
-//        return NimbusJwtDecoder
-//                .withSecretKey(secretKeySpec)
-//                .macAlgorithm(MacAlgorithm.HS512)
-//                .build();
-//    };
 
     @Bean
     PasswordEncoder passwordEncoder(){

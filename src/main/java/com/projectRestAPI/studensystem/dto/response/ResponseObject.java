@@ -1,16 +1,15 @@
 package com.projectRestAPI.studensystem.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseObject {
     private String status;
     private String message;

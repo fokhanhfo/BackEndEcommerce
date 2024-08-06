@@ -5,6 +5,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @NoArgsConstructor
@@ -14,10 +15,13 @@ import lombok.*;
 @Setter
 @Builder
 public class Image extends BaseEntity {
-    @Column(name="name_Image")
-    private String name_Image;
-
-    @Column(name = "main_photo")
-    private int main_photo;
+    private String name;
+    private String type;
+    @Lob
+    @Column(length = Integer.MAX_VALUE)
+    private byte[] file;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
 }

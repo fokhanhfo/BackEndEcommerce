@@ -1,5 +1,7 @@
 package com.projectRestAPI.studensystem.controller;
 
+import com.projectRestAPI.studensystem.Exception.AppException;
+import com.projectRestAPI.studensystem.Exception.ErrorCode;
 import com.projectRestAPI.studensystem.dto.request.UserRequest;
 import com.projectRestAPI.studensystem.dto.response.ResponseObject;
 import com.projectRestAPI.studensystem.dto.response.UserResponse;
@@ -38,6 +40,8 @@ public class UserController {
     private UsersService usersService;
     @Autowired
     private RolesService rolesService;
+    @Autowired
+    private UsersRepository usersRepository;
 
     @GetMapping("/getAll")
     @PreAuthorize("hasRole('ADMIN')")
@@ -52,17 +56,18 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getId(@PathVariable Long id){
-        Optional<Users> opt = usersService.findById(id);
-        if(opt.isEmpty()){
-            return new ResponseEntity<>(new ResponseObject("Fail", "Không Thấy ID", 1, null), HttpStatus.BAD_REQUEST);
-        }
-        UserRequest userRequest =mapper.map(opt, UserRequest.class);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(userRequest.getUsername().equals(authentication.getName())){
-            return new ResponseEntity<>(userRequest, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(new ResponseObject("0","Người dùng không hợp lệ",0,null), HttpStatus.BAD_REQUEST);
+    public Users getId(@PathVariable Long id){
+//        Optional<Users> opt = usersService.findById(id);
+//        if(opt.isEmpty()){
+//            return new ResponseEntity<>(new ResponseObject("Fail", "Không Thấy ID", 1, null), HttpStatus.BAD_REQUEST);
+//        }
+//        UserRequest userRequest =mapper.map(opt, UserRequest.class);
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if(userRequest.getUsername().equals(authentication.getName())){
+//            return new ResponseEntity<>(userRequest, HttpStatus.OK);
+//        }
+//        return new ResponseEntity<>(new ResponseObject("0","Người dùng không hợp lệ",0,null), HttpStatus.BAD_REQUEST);
+        return usersService.findById(id).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
     @GetMapping("myInfo")

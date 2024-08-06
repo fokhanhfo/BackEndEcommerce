@@ -16,8 +16,9 @@ import java.math.BigDecimal;
 @Builder
 public class Cart extends BaseEntity{
     @Column(name = "quantity")
-    private int quantity;
-
+    private Integer quantity;
+    @Column(name = "status")
+    private Integer status;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;

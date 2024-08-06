@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -22,7 +23,7 @@ public class Bill extends BaseEntity{
     private String email;
 
     @Column(name = "status")
-    private int status;
+    private Integer status;
 
     @Column(name = "address")
     private String address;
@@ -30,12 +31,14 @@ public class Bill extends BaseEntity{
     @Column(name = "total_price")
     private BigDecimal total_price;
 
+    @Column(name = "created_date", updatable = false)
+    private LocalDateTime createdDate;
+
     @ManyToOne
     @JoinColumn(name = "User_id")
     private Users user;
 
-    @OneToMany
-    @JoinColumn(name = "bill_id")
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillDetail> billDetail;
 
 }

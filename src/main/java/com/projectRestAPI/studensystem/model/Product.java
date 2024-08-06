@@ -6,6 +6,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Table(name = "Product")
 @Entity
@@ -23,12 +24,17 @@ public class Product extends BaseEntity {
     private BigDecimal price;
     @Column(name="quantity")
     private Integer quantity;
+    @Column(name="status")
+    private Integer status;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany
-    @JoinColumn(name = "product_id")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Image> images;
+
+    public List<String> getImageNames(){
+        return images.stream().map(Image::getName).collect(Collectors.toList());
+    }
 }

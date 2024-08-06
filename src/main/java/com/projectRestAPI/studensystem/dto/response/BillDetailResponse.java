@@ -13,11 +13,6 @@ import java.util.List;
 @Builder
 public class BillDetailResponse {
     private Long id;
-    private String phone;
-    private String email;
-    private String address;
-    private BigDecimal total_price;
-    private int status;
-    private String name_user;
-    private List<BillDetail> billDetails;
+    private ProductResponse productId;
+    private Integer quantity;
 }

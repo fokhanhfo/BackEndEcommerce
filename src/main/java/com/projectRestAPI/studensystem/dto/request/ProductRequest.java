@@ -6,6 +6,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,5 +30,6 @@ public class ProductRequest {
     private Integer quantity;
     @NotNull(message = "Danh mục sản phẩm không được để trống")
     private Long category;
-    private List<Image> images;
+    private Integer Status;
+    private List<MultipartFile> images;
 }

@@ -8,9 +8,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ImageRepository extends BaseRepository<Image,Long> {
-//    @Query("SELECT img FROM Image img WHERE img.image_product_id = :product_id")
-//    List<Image> findImageByProduct_id(@Param("product_id") Long productId);
+    List<Image> findByProductId(Long id);
+
+    Optional<Image> findByName(String name);
 }

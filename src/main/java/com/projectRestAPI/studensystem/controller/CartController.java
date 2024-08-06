@@ -1,5 +1,7 @@
 package com.projectRestAPI.studensystem.controller;
 
+import com.projectRestAPI.studensystem.Exception.AppException;
+import com.projectRestAPI.studensystem.Exception.ErrorCode;
 import com.projectRestAPI.studensystem.dto.request.CartRequest;
 import com.projectRestAPI.studensystem.dto.response.CartResponse;
 import com.projectRestAPI.studensystem.dto.response.ResponseObject;
@@ -24,59 +26,29 @@ import java.util.Optional;
 public class CartController {
     @Autowired
     private CartService cartService;
-    @Autowired
-    private UsersService usersService;
-    @Autowired
-    private ProductService productService;
-    @Autowired
-    private ProductRepository productRepository;
 
     @GetMapping
-    public ResponseEntity<?> getCart(){
-        List<Cart> carts = cartService.getCart();
-        List<CartResponse> cartResponses = new ArrayList<>();
-        for(Cart cart : carts){
-            CartResponse cartResponse= CartResponse.builder()
-                    .id(cart.getId())
-                    .product(productRepository.findById(cart.getProduct().getId()).orElse(null))
-                    .quantity(cart.getQuantity())
-                    .build();
-            cartResponses.add(cartResponse);
-        }
-        return new ResponseEntity<>(cartResponses, HttpStatus.OK);
+    public ResponseEntity<ResponseObject> getCart(){
+        return cartService.getCart();
     }
 
     @PostMapping
-    public ResponseEntity<?> add(@RequestBody CartRequest cartRequest) {
-        Users user = usersService.getUser();
-        Optional<Product> productOptional = productService.findById(cartRequest.getProduct());
-
-        if (productOptional.isPresent()) {
-            Product product = productOptional.get();
-            Cart cart = Cart.builder()
-                    .product(product)
-                    .quantity(cartRequest.getQuantity())
-                    .user(user)
-                    .build();
-            return cartService.createNew(cart);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ResponseObject> add(@RequestBody CartRequest cartRequest) {
+        return cartService.AddCart(cartRequest);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,@RequestBody CartRequest cartRequest){
-        Optional<Cart> cartOptional = cartService.findById(id);
-        if(cartOptional.isPresent()){
-            Cart cart = cartOptional.get();
-            cart.setQuantity(cartRequest.getQuantity());
-            return cartService.update(cart);
-        }
-        return new ResponseEntity<>(new ResponseObject("error","Udate không thành công",0,cartRequest),HttpStatus.BAD_REQUEST);
+        return cartService.UpdateQuantityCart(id,cartRequest);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id){
-        return cartService.delete(id);
+    public ResponseEntity<?> deleteId(@PathVariable Long id){
+        return cartService.deleteProductCart(id);
+    }
+
+    @DeleteMapping
+    public  ResponseEntity<ResponseObject> deleteAll(){
+        return cartService.deleteAll();
     }
 }

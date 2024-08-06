@@ -12,5 +12,6 @@ import lombok.*;
 public class CartResponse {
     private Long id;
     private Integer quantity;
-    private Product product;
+    private ProductResponse product;
+    private Integer status;
 }

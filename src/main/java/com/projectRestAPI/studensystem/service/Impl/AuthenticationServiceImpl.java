@@ -8,6 +8,8 @@ import com.nimbusds.jwt.SignedJWT;
 import com.projectRestAPI.studensystem.dto.request.AuthenticationRequest;
 import com.projectRestAPI.studensystem.dto.request.IntrospectRequest;
 import com.projectRestAPI.studensystem.dto.request.LogoutRequest;
+import com.projectRestAPI.studensystem.dto.request.RefreshRequest;
+import com.projectRestAPI.studensystem.dto.response.AuthenticationResponse;
 import com.projectRestAPI.studensystem.dto.response.IntrospectResponse;
 import com.projectRestAPI.studensystem.dto.response.ResponseObject;
 import com.projectRestAPI.studensystem.model.InvalidatedToken;
@@ -61,16 +63,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ResponseEntity<ResponseObject> authenticate(AuthenticationRequest authenticationRequest) {
         Optional<Users> userOpt = usersRepository.findByUsername(authenticationRequest.getUsername());
-        Users user = userOpt.orElseThrow(() -> new IllegalStateException("Không tìm thấy người dùng với username: "
-                + authenticationRequest.getUsername()));
+        if(userOpt.isEmpty()){
+            return new ResponseEntity<>(new ResponseObject("false", "Không tìm thấy tài khoản", 0, authenticationRequest), HttpStatus.BAD_REQUEST);
+        }
+        Users user = userOpt.get();
         PasswordEncoder passwordEncoder =new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(),user.getPassword());
         if(!authenticated){
-            return new ResponseEntity<>(new ResponseObject("false", "false", 0, authenticationRequest), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseObject("false", "Tài khoản hoặc mật khẩu sai", 0, authenticationRequest), HttpStatus.BAD_REQUEST);
         }
         String token =generateToken(user);
 
-        return new ResponseEntity<>(new ResponseObject("true", "Tài khoản đúng", 0, token), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseObject("true", "Đăng nhập thành công", 0, token), HttpStatus.OK);
     }
 
     public void logout(LogoutRequest request) throws Exception {
@@ -110,6 +114,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return signedJWT;
     }
 
+    public ResponseEntity<?> refreshToken(RefreshRequest request) throws Exception {
+        var signedJWT =verifyToken(request.getToken());
+
+        var jit = signedJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        InvalidatedToken invalidatedToken =InvalidatedToken.builder()
+                .idCode(jit)
+                .expiryTime(expiryTime)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        var username = signedJWT.getJWTClaimsSet().getSubject();
+        var user = usersRepository.findByUsername(username).orElseThrow();
+
+        var token = generateToken(user);
+
+        return new ResponseEntity<>(new ResponseObject("true", "Tài khoản đúng", 0, token), HttpStatus.OK);
+    }
+
     private String generateToken(Users users){
         JWSHeader header =new JWSHeader(JWSAlgorithm.HS512);
 
@@ -118,7 +141,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .issuer("")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(30, ChronoUnit.DAYS).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope",buildScope(users))

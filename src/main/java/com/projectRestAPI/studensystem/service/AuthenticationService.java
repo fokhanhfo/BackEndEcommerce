@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import com.projectRestAPI.studensystem.dto.request.AuthenticationRequest;
 import com.projectRestAPI.studensystem.dto.request.IntrospectRequest;
 import com.projectRestAPI.studensystem.dto.request.LogoutRequest;
+import com.projectRestAPI.studensystem.dto.request.RefreshRequest;
 import com.projectRestAPI.studensystem.dto.response.IntrospectResponse;
 import com.projectRestAPI.studensystem.dto.response.ResponseObject;
 import com.projectRestAPI.studensystem.repository.UsersRepository;
@@ -19,4 +20,6 @@ public interface AuthenticationService {
     IntrospectResponse introspect(IntrospectRequest introspectRequest) throws Exception;
 
     public void logout(LogoutRequest request) throws Exception;
+
+    public ResponseEntity<?> refreshToken(RefreshRequest request) throws Exception;
 }

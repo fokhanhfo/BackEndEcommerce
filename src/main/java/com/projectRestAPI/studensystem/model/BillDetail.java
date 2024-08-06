@@ -20,6 +20,10 @@ public class BillDetail extends BaseEntity{
     private Product productId;
 
     @Column(name = "quantity")
-    private int quantity;
+    private Integer quantity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bill_id")
+    private Bill bill;
 
 }

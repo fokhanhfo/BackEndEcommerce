@@ -1,7 +1,11 @@
 package com.projectRestAPI.studensystem.dto.request;
 
-import jakarta.persistence.Column;
+import com.projectRestAPI.studensystem.model.Product;
+import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -9,6 +13,5 @@ import lombok.*;
 @Setter
 @ToString
 public class ImageRequest {
-    private String name_Image;
-    private int main_photo;
+    private List<MultipartFile> file;
 }

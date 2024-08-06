@@ -4,8 +4,10 @@ import com.nimbusds.jose.JOSEException;
 import com.projectRestAPI.studensystem.dto.request.AuthenticationRequest;
 import com.projectRestAPI.studensystem.dto.request.IntrospectRequest;
 import com.projectRestAPI.studensystem.dto.request.LogoutRequest;
+import com.projectRestAPI.studensystem.dto.request.RefreshRequest;
 import com.projectRestAPI.studensystem.dto.response.ResponseObject;
 import com.projectRestAPI.studensystem.service.AuthenticationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +27,7 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
 
     @PostMapping("/token")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request){
+    public ResponseEntity<?> authenticate(@RequestBody @Valid AuthenticationRequest request){
         return new ResponseEntity<>(authenticationService.authenticate(request),HttpStatus.OK);
     }
 
@@ -38,5 +40,10 @@ public class AuthenticationController {
     public ResponseEntity<Void> logout(@RequestBody LogoutRequest request) throws Exception {
         authenticationService.logout(request);
         return new ResponseEntity<>(null,HttpStatus.OK);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> authenticate(@RequestBody RefreshRequest request) throws Exception {
+        return authenticationService.refreshToken(request);
     }
 }
