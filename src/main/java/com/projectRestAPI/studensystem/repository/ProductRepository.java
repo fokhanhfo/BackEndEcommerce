@@ -16,6 +16,7 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends BaseRepository<Product,Long> {
     Boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, Long id);
 
     @Query("SELECT p FROM Product p " +
             "WHERE (:categoryId IS NULL OR p.category.id = :categoryId) " +
@@ -31,6 +32,9 @@ public interface ProductRepository extends BaseRepository<Product,Long> {
                                @Param("sort") String sort,
                                @Param("search") String search,
                                Pageable pageable);
+
+    @Query("SELECT p from Product p ORDER BY p.id DESC")
+    Page<Product> findProductNew(Pageable pageable);
 
     @Query("select count(p.id) from Product p ")
     Integer getCount();

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -27,8 +28,8 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
 
     @PostMapping("/token")
-    public ResponseEntity<?> authenticate(@RequestBody @Valid AuthenticationRequest request){
-        return new ResponseEntity<>(authenticationService.authenticate(request),HttpStatus.OK);
+    public ResponseEntity<ResponseObject> authenticate(@RequestBody @Valid AuthenticationRequest request){
+        return authenticationService.authenticate(request) ;
     }
 
     @PostMapping("/introspect")
@@ -45,5 +46,10 @@ public class AuthenticationController {
     @PostMapping("/refresh")
     public ResponseEntity<?> authenticate(@RequestBody RefreshRequest request) throws Exception {
         return authenticationService.refreshToken(request);
+    }
+
+    @PostMapping("/facebook-login")
+    public ResponseEntity<?> facebookLogin(@RequestBody Map<String, String> payload){
+        return authenticationService.facebookLogin(payload);
     }
 }

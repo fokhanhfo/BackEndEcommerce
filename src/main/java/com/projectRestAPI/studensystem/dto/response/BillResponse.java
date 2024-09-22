@@ -22,6 +22,6 @@ public class BillResponse {
     private String address;
     private BigDecimal total_price;
     private LocalDateTime createdDate;
-    private Long user_id;
+    private UserResponse userResponse;
     private List<BillDetailResponse> billDetail;
 }

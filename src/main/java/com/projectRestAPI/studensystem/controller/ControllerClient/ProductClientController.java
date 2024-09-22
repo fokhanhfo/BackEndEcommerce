@@ -1,6 +1,7 @@
 package com.projectRestAPI.studensystem.controller.ControllerClient;
 
 import com.projectRestAPI.studensystem.dto.param.ProductParam;
+import com.projectRestAPI.studensystem.dto.response.ResponseObject;
 import com.projectRestAPI.studensystem.enums.StatusProduct;
 import com.projectRestAPI.studensystem.model.Product;
 import com.projectRestAPI.studensystem.service.ProductService;
@@ -28,16 +29,29 @@ public class ProductClientController {
                                     @RequestParam(value = "price_gte",defaultValue = "") BigDecimal price_gte,
                                     @RequestParam(value = "price_lte",defaultValue = "") BigDecimal price_lte,
                                     @RequestParam(value = "sort",defaultValue = "") String sort,
-                                    @RequestParam(value = "search",defaultValue = "") String search){
+                                    @RequestParam(value = "search",defaultValue = "") String search,
+                                    @RequestParam(value = "status",defaultValue = "") Integer status){
         Pageable pageable = PageRequest.of(page,limit);
         ProductParam productParam = ProductParam.builder()
                 .categoryId(category_id)
                 .priceGte(price_gte)
                 .priceLte(price_lte)
-                .status(StatusProduct.PRODUCT_ACTIVE.getStatus())
+                .status(status)
                 .sort(sort)
                 .search(search)
                 .build();
         return productService.getAllProduct(pageable,productParam);
     }
+
+    @GetMapping("/newProduct")
+    public  ResponseEntity<ResponseObject> getNewProduct(@RequestParam(value = "page",defaultValue = "0") Integer page,
+                                                         @RequestParam(value = "limit",defaultValue = "12") int limit){
+        Integer maxPage = 2;
+        if(page>maxPage){
+            page=maxPage;
+        }
+        Pageable pageable = PageRequest.of(page,limit);
+        return productService.getNewProduct(pageable);
+    }
+
 }

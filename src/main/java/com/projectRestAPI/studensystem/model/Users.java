@@ -31,6 +31,8 @@ public class Users extends BaseEntity {
     private String username;
     @Column(name = "password")
     private String password;
+    @Column(name = "type")
+    private Integer typeLogin;
 
     @ManyToMany
     List<Roles> roles;

@@ -2,27 +2,28 @@ package com.projectRestAPI.studensystem.service.Impl;
 
 import com.projectRestAPI.studensystem.Exception.AppException;
 import com.projectRestAPI.studensystem.Exception.ErrorCode;
+import com.projectRestAPI.studensystem.dto.param.BillParam;
+import com.projectRestAPI.studensystem.dto.param.ProductParam;
 import com.projectRestAPI.studensystem.dto.request.BillRequest;
 import com.projectRestAPI.studensystem.dto.request.CartRequest;
-import com.projectRestAPI.studensystem.dto.response.BillDetailResponse;
-import com.projectRestAPI.studensystem.dto.response.BillResponse;
-import com.projectRestAPI.studensystem.dto.response.ProductResponse;
-import com.projectRestAPI.studensystem.dto.response.ResponseObject;
+import com.projectRestAPI.studensystem.dto.response.*;
+import com.projectRestAPI.studensystem.dto.response.BillPage.BillPageResponse;
 import com.projectRestAPI.studensystem.model.*;
 import com.projectRestAPI.studensystem.repository.BillRepository;
 import com.projectRestAPI.studensystem.repository.ProductRepository;
+import com.projectRestAPI.studensystem.repository.UsersRepository;
 import com.projectRestAPI.studensystem.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,8 +39,38 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
     @Autowired
     private ProductService productService;
     @Autowired
+    private UsersRepository usersRepository;
+    @Autowired
     private ModelMapper mapper;
     private final String UrlBase="http://localhost:8080/image/";
+    // biến ROLE_NAME cần cho vào aplication
+    protected static final List<String> ROLE_NAMES = Arrays.asList("ADMIN", "MANAGER", "EMPLOYEE");
+
+    @Override
+    public ResponseEntity<ResponseObject> getAll(Pageable pageable, BillParam billParam) {
+        BillPageResponse billPageResponse = repository.findBillsByCriteria(
+                billParam.getStartDate(),
+                billParam.getEndDate(),
+                billParam.getSort(),
+                billParam.getSearch(),
+                billParam.getStatus(),
+                pageable
+        );
+        Page<Bill> billPage = billPageResponse.getBillPage();
+        List<Bill> bills = billPage.getContent();
+        List<BillResponse> billResponses = bills.stream().map(this::mapToResponse).toList();
+        Long totalRowBill = billPageResponse.getTotalRows();
+        ResponseObject responseObject = ResponseObject.builder()
+                .status("Success")
+                .message("Lấy dữ liệu thành công")
+                .errCode(200)
+                .data(new HashMap<String,Object>(){{
+                    put("bill",billResponses);
+                    put("count",totalRowBill);
+                }})
+                .build();
+        return new ResponseEntity<>(responseObject, HttpStatus.OK);
+    }
 
     @Override
     public ResponseEntity<?> saveBill(BillRequest billRequest) {
@@ -67,7 +98,12 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
 
     @Override
     public ResponseEntity<ResponseObject> getBillId(Long id){
+        Users users = usersService.getUser();
         Bill bill = findById(id).orElseThrow(()->new AppException(ErrorCode.BILL_NOT_FOUND));
+        List<String> roleName = users.getRoles().stream().map(Roles::getName).toList();
+        if(!(users == bill.getUser()) && !roleName.contains("USER")){
+
+        }
         BillResponse billResponse = mapToResponse(bill);
         return new ResponseEntity<>(new ResponseObject("Succes","Lấy hóa đơn thành công",200,billResponse), HttpStatus.OK);
     }
@@ -111,18 +147,23 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
         return total;
     }
 
-    private BillResponse mapToResponse(Bill bill){
-        BillResponse billResponse = mapper.map(bill,BillResponse.class);
-        billResponse.setUser_id(bill.getUser().getId());
+    private BillResponse mapToResponse(Bill bill) {
+        BillResponse billResponse = mapper.map(bill, BillResponse.class);
 
-        List<BillDetail> billDetails = bill.getBillDetail();
-        List<Product> products = billDetails.stream().map(BillDetail::getProductId).toList();
-        List<BillDetailResponse> billDetailResponses = billResponse.getBillDetail();
+        Users users = usersService.getUser();
 
-        for (BillDetailResponse billDetailResponse : billDetailResponses){
-            Product product =findProductById(products,billDetailResponse.getProductId().getId());
-            if(product != null){
-                List<String> imageUrl = product.getImages().stream().map(image -> UrlBase+image.getName())
+        UserResponse userResponse = usersService.validUser(users);
+        billResponse.setUserResponse(userResponse);
+
+        List<Product> products = bill.getBillDetail().stream()
+                .map(BillDetail::getProductId)
+                .toList();
+
+        for (BillDetailResponse billDetailResponse : billResponse.getBillDetail()) {
+            Product product = findProductById(products, billDetailResponse.getProductId().getId());
+            if (product != null) {
+                List<String> imageUrl = product.getImages().stream()
+                        .map(image -> UrlBase + image.getName())
                         .toList();
                 billDetailResponse.getProductId().setImagesUrl(imageUrl);
             }
@@ -130,6 +171,7 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
 
         return billResponse;
     }
+
 
     private Product findProductById(List<Product> products,Long productId){
         return products.stream().filter(product -> product.getId().equals(productId)).findFirst().orElse(null);

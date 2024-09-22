@@ -12,4 +12,9 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long,CategoryR
     public boolean isCategoryExists(String categoryName) {
         return repository.existsByName(categoryName);
     }
+
+    @Override
+    public boolean isCategoryExistsIdNot(String name, Long id) {
+        return repository.existsByNameAndIdNot(name,id);
+    }
 }

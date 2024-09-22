@@ -10,6 +10,8 @@ import java.util.List;
 public interface CategoryService extends BaseService<Category,Long> {
     public boolean isCategoryExists(String categoryName);
 
+    boolean isCategoryExistsIdNot(String name, Long id);
+
 //    public ResponseEntity<ResponseObject> addCategory(CategoryRequest categoryRequest);
 //
 //    public ResponseEntity<ResponseObject> getIdCategory(Long id);

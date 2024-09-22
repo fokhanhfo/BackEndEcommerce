@@ -27,12 +27,22 @@ import javax.crypto.spec.SecretKeySpec;
 public class SecurityConfig {
 
     private final String[] PUBLIC_POST_ENDPOINTS ={
-            "/user/add","/auth/token" ,"/auth/introspect","/auth/logout","/category/getAll"
+            "/user/add",
+            "/auth/token" ,
+            "/auth/introspect",
+            "/auth/logout",
+            "/category/getAll",
+            "/auth/refresh",
+            "/auth/facebook-login"
     };
 
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/category/getAll",
-            "/product/getAll"
+            "/category/**",
+            "/product/getAll",
+            "/product/{id}",
+            "/shop",
+            "/image/**",
+            "/auth/facebook-login"
     };
 
     @Autowired
@@ -40,18 +50,25 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity.authorizeHttpRequests(request->
-//                request.requestMatchers(HttpMethod.POST,PUBLIC_POST_ENDPOINTS).permitAll()
-//                        .requestMatchers(HttpMethod.GET,PUBLIC_GET_ENDPOINTS).permitAll()
-//                        .anyRequest().authenticated());
-        httpSecurity.authorizeHttpRequests(request ->
-                request.anyRequest().permitAll());
+        httpSecurity.authorizeHttpRequests(request->
+                request.requestMatchers(HttpMethod.POST,PUBLIC_POST_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET,PUBLIC_GET_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated());
+//        httpSecurity.authorizeHttpRequests(request ->
+//                request.anyRequest().permitAll());
+
+//        httpSecurity.oauth2Login((oauth2)->{
+//            oauth2
+//                    .defaultSuccessUrl("/home", true)
+//                    .failureUrl("/auth/login?error=true");
+//        });
 
         httpSecurity.oauth2ResourceServer(oauth2->
                 oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
+
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();

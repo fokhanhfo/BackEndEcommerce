@@ -1,22 +1,24 @@
 package com.projectRestAPI.studensystem.service.Impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.projectRestAPI.studensystem.dto.request.AuthenticationRequest;
-import com.projectRestAPI.studensystem.dto.request.IntrospectRequest;
-import com.projectRestAPI.studensystem.dto.request.LogoutRequest;
-import com.projectRestAPI.studensystem.dto.request.RefreshRequest;
+import com.projectRestAPI.studensystem.dto.request.*;
 import com.projectRestAPI.studensystem.dto.response.AuthenticationResponse;
 import com.projectRestAPI.studensystem.dto.response.IntrospectResponse;
 import com.projectRestAPI.studensystem.dto.response.ResponseObject;
+import com.projectRestAPI.studensystem.enums.LoginType;
+import com.projectRestAPI.studensystem.enums.Role;
 import com.projectRestAPI.studensystem.model.InvalidatedToken;
 import com.projectRestAPI.studensystem.model.Users;
 import com.projectRestAPI.studensystem.repository.InvalidatedTokenRepository;
+import com.projectRestAPI.studensystem.repository.RolesRepository;
 import com.projectRestAPI.studensystem.repository.UsersRepository;
 import com.projectRestAPI.studensystem.service.AuthenticationService;
+import com.projectRestAPI.studensystem.service.UsersService;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,14 +28,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -46,11 +46,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Value("${app.jwt}")
     protected String SIGNER_KEY;
 
+    @NonFinal
+    @Value("${app.jwt.accessTokenExpiration}")
+    protected long accessTokenExpiration;
+
+    @NonFinal
+    @Value("${app.jwt.refreshTokenExpiration}")
+    protected long refreshTokenExpiration;
+
+    @Autowired
+    private UsersService usersService;
+
     public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws Exception {
         String token = introspectRequest.getToken();
         boolean isValid = true;
         try{
-            verifyToken(token);
+            verifyToken(token,false);
         }catch (Exception e){
             isValid=false;
         }
@@ -64,21 +75,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<ResponseObject> authenticate(AuthenticationRequest authenticationRequest) {
         Optional<Users> userOpt = usersRepository.findByUsername(authenticationRequest.getUsername());
         if(userOpt.isEmpty()){
-            return new ResponseEntity<>(new ResponseObject("false", "Không tìm thấy tài khoản", 0, authenticationRequest), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseObject("400", "Không tìm thấy tài khoản", 0, authenticationRequest), HttpStatus.BAD_REQUEST);
         }
         Users user = userOpt.get();
         PasswordEncoder passwordEncoder =new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(),user.getPassword());
         if(!authenticated){
-            return new ResponseEntity<>(new ResponseObject("false", "Tài khoản hoặc mật khẩu sai", 0, authenticationRequest), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseObject("400", "Tài khoản hoặc mật khẩu sai", 0, authenticationRequest), HttpStatus.BAD_REQUEST);
         }
         String token =generateToken(user);
 
-        return new ResponseEntity<>(new ResponseObject("true", "Đăng nhập thành công", 0, token), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseObject("200", "Đăng nhập thành công", 0, token), HttpStatus.OK);
     }
 
     public void logout(LogoutRequest request) throws Exception {
-        SignedJWT signToken = verifyToken(request.getToken());
+        SignedJWT signToken = verifyToken(request.getToken(),false);
 
         String jit =signToken.getJWTClaimsSet().getJWTID();
         Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
@@ -90,7 +101,39 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         invalidatedTokenRepository.save(invalidatedToken);
     }
 
-    private SignedJWT verifyToken(String token) throws Exception {
+    public ResponseEntity<ResponseObject> facebookLogin(Map<String,String> payload){
+        String accessToken = payload.get("token");
+
+        // Gửi Access Token đến Facebook Graph API để lấy thông tin người dùng
+        String url = "https://graph.facebook.com/me?fields=id,name,email,birthday,picture&access_token=" + accessToken;
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        FaceBookUserRequest faceBookUserRequest;
+        try{
+            faceBookUserRequest = objectMapper.readValue(response.getBody(), FaceBookUserRequest.class);
+
+            Optional<Users> usersOptional = usersRepository.findByUsername(faceBookUserRequest.getId());
+            if(usersOptional.isEmpty()){
+                UserRequest userRequest = UserRequest.builder()
+                        .fullName(faceBookUserRequest.getName())
+                        .username(faceBookUserRequest.getId())
+                        .typeLogin(LoginType.FACEBOOK_LOGIN.getLoginType())
+                        .password("khanhkomonny")
+                        .build();
+                usersService.addUser(userRequest);
+                return authenticate(new AuthenticationRequest(faceBookUserRequest.getId(), "khanhkomonny"));
+            }
+            Users users = usersOptional.get();
+            return authenticate(new AuthenticationRequest(users.getUsername(), "khanhkomonny"));
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(new ResponseObject("400", "Đăng nhập không thành công", 0, null), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private SignedJWT verifyToken(String token ,boolean isRefresh) throws Exception {
         //tạo một đối tượng JWSVerifier để xác minh chữ ký của token. Trong trường hợp này, nó sử dụng MACVerifier,
         // một loại JWSVerifier dựa trên mã hóa MAC (Message Authentication Code), và cung
         // cấp khóa để xác thực (SIGNER_KEY).
@@ -98,8 +141,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         SignedJWT signedJWT =SignedJWT.parse(token);
 
-        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
+        Date expityTime = (isRefresh)
+                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(refreshTokenExpiration,ChronoUnit.DAYS).toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean verified =  signedJWT.verify(verifier);
 
         if(!(verified && expityTime.after(new Date()))){
@@ -110,13 +154,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new Exception("Đã Logout");
         }
 
-
         return signedJWT;
     }
 
     public ResponseEntity<?> refreshToken(RefreshRequest request) throws Exception {
-        var signedJWT =verifyToken(request.getToken());
+        System.out.println("đã refresh");
+        var signedJWT =verifyToken(request.getToken(),true);
 
+//        khi refreshToken thì phải cho token ấy logout đã
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
         var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         InvalidatedToken invalidatedToken =InvalidatedToken.builder()
@@ -130,7 +175,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         var token = generateToken(user);
 
-        return new ResponseEntity<>(new ResponseObject("true", "Tài khoản đúng", 0, token), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseObject("200", "Tài khoản đúng", 0, token), HttpStatus.OK);
     }
 
     private String generateToken(Users users){
@@ -141,7 +186,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .issuer("")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(30, ChronoUnit.DAYS).toEpochMilli()
+                        Instant.now().plus(accessTokenExpiration, ChronoUnit.MINUTES).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope",buildScope(users))

@@ -16,16 +16,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/category")
-@CrossOrigin({"http://localhost:3000", "http://127.0.0.1:5500"})
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping
 
 
-//    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<?> add(@RequestBody Category category) {
         if(categoryService.isCategoryExists(category.getName())){
             return new ResponseEntity<>(new ResponseObject("Error","Trùng tên danh mục",400,null),HttpStatus.BAD_REQUEST);
@@ -34,12 +31,13 @@ public class CategoryController {
     }
 
 
-    @GetMapping("getAll")
+    @GetMapping
     public ResponseEntity<ResponseObject> getAllCategory(){
         List<Category> categories = categoryService.findAll();
         return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",200,categories),HttpStatus.OK);
     }
 
+//    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ResponseObject> get(@PathVariable Long id){
         Optional<Category> categoryOptional=categoryService.findById(id);
@@ -53,7 +51,7 @@ public class CategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<ResponseObject> update(@RequestBody CategoryRequest categoryRequest, @PathVariable Long id){
         try{
-            if(categoryService.isCategoryExists(categoryRequest.getName())){
+            if(categoryService.isCategoryExistsIdNot(categoryRequest.getName(),id)){
                 return new ResponseEntity<>(new ResponseObject("Error","Trùng tên danh mục",400,null),HttpStatus.BAD_REQUEST);
             }
             Optional<Category> updateCategory=categoryService.findById(id);

@@ -32,5 +32,7 @@ public class UserRequest {
 
     private String password;
 
+    private Integer typeLogin;
+
     private List<Long> roles;
 }

@@ -77,16 +77,7 @@ public class UserController {
 
     @PostMapping("/add")
     public ResponseEntity<?> add(@RequestBody UserRequest userRequest){
-        if(usersService.isUserExists(userRequest.getUsername())){
-            return new ResponseEntity<>(new ResponseObject("Fail", "Trùng Username", 1, null), HttpStatus.BAD_REQUEST);
-        }
-        Users users = mapper.map(userRequest, Users.class);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        users.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        List<Roles> roles = new ArrayList<>();
-        roles.add(rolesService.findById(2L).get());
-        users.setRoles(roles);
-        return usersService.createNew(users);
+        return usersService.addUser(userRequest);
     }
 
     @PutMapping ("/{id}")

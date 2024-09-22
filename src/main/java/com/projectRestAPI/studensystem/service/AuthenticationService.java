@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.util.Map;
 
 @Service
 public interface AuthenticationService {
@@ -22,4 +23,6 @@ public interface AuthenticationService {
     public void logout(LogoutRequest request) throws Exception;
 
     public ResponseEntity<?> refreshToken(RefreshRequest request) throws Exception;
+
+    ResponseEntity<?> facebookLogin(Map<String,String> payload);
 }

@@ -1,6 +1,7 @@
 package com.projectRestAPI.studensystem.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 public class Product extends BaseEntity {
     @Column(name="name")
     private String name;
-    @Column(name="detail")
+    @Column(name="detail", length = 500)
     private String detail;
     @Column(name="price")
     private BigDecimal price;

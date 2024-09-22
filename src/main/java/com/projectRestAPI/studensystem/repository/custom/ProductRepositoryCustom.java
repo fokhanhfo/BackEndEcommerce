@@ -8,5 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductRepositoryCustom {
-    Page<Product> findProductsByCriteria(Long categoryId, BigDecimal priceGte, BigDecimal priceLte, String sort, List<String> searchKeywords, Pageable pageable);
+    Page<Product> findProductsByCriteria(Long categoryId, BigDecimal priceGte, BigDecimal priceLte, String sort, List<String> searchKeywords, Integer status ,Pageable pageable);
+
+    Integer findCountProduct(Long categoryId, BigDecimal priceGte, BigDecimal priceLte, String sort, List<String> searchKeywords, Integer status);
 }

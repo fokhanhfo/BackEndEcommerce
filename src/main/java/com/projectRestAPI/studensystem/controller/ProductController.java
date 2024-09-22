@@ -17,6 +17,8 @@ import com.projectRestAPI.studensystem.service.ProductService;
 import jakarta.validation.Valid;
 import org.modelmapper.internal.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -42,10 +44,6 @@ public class ProductController {
         return productService.getAll();
     }
 
-    @GetMapping("/count")
-    public ResponseEntity<ResponseObject> getCount(){
-        return productService.getCount();
-    }
 
     @PostMapping("/Add")
     public ResponseEntity<?> add(@Valid @ModelAttribute ProductRequest productRequest){

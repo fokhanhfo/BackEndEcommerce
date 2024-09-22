@@ -2,6 +2,7 @@ package com.projectRestAPI.studensystem.repository;
 
 import com.projectRestAPI.studensystem.model.Bill;
 import com.projectRestAPI.studensystem.model.Users;
+import com.projectRestAPI.studensystem.repository.custom.BillRepositoryCustom;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BillRepository extends BaseRepository<Bill,Long>{
+public interface BillRepository extends BaseRepository<Bill,Long>, BillRepositoryCustom {
 
     List<Bill> findByUser(Users users);
 

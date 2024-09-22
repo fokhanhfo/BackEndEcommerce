@@ -26,5 +26,7 @@ public interface ProductService extends BaseService<Product,Long> {
 
     ResponseEntity<ResponseObject> getCount();
 
+    ResponseEntity<ResponseObject> getNewProduct(Pageable pageable);
+
 
 }

@@ -30,10 +30,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -91,6 +88,9 @@ public class ProductServiceImpl extends BaseServiceImpl<Product , Long , Product
     @Override
     public ResponseEntity<ResponseObject> updateProduct(Long id,ProductRequest productRequest){
         Optional<Category> categoryOptional = categoryService.findById(productRequest.getCategory());
+        if(repository.existsByNameAndIdNot(productRequest.getName(),id)){
+            throw new AppException(ErrorCode.PRODUCT_ALREADY_EXISTS);
+        }
         if(categoryOptional.isEmpty()){
             throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
@@ -105,6 +105,7 @@ public class ProductServiceImpl extends BaseServiceImpl<Product , Long , Product
         product.setPrice(productRequest.getPrice());
         product.setQuantity(productRequest.getQuantity());
         product.setCategory(category);
+        product.setStatus(productRequest.getStatus());
         createNew(product);
         ProductResponse productResponse = mapToResponse(product);
         return new ResponseEntity<>(new ResponseObject("Succes","Update sản phẩm thành công",200,productResponse), HttpStatus.OK);
@@ -128,17 +129,46 @@ public class ProductServiceImpl extends BaseServiceImpl<Product , Long , Product
                 productParam.getPriceLte(),
                 productParam.getSort(),
                 searchKeywords,
+                productParam.getStatus(),
                 pageable
         );
+        Integer
+                count = productRepositoryCustom.findCountProduct(
+                productParam.getCategoryId(),
+                productParam.getPriceGte(),
+                productParam.getPriceLte(),
+                productParam.getSort(),
+                searchKeywords,
+                productParam.getStatus()
+        );
+        System.out.println(count);
         List<Product> products = productsPage.getContent();
         List<ProductResponse> productResponses = products.stream()
                 .map(this::mapToResponse).toList();
-        return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",200,productResponses),HttpStatus.OK);
+        ResponseObject responseObject = ResponseObject.builder()
+                .status("Success")
+                .message("Lấy dữ liệu thành công")
+                .errCode(200)
+                .data(new HashMap<String,Object>(){{
+                    put("products",productResponses);
+                    put("count",count);
+                }})
+                .build();
+
+        return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResponseObject> getCount() {
         return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",200,repository.getCount()),HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getNewProduct(Pageable pageable) {
+        Page<Product> productPage = repository.findProductNew(pageable);
+        List<Product> productList = productPage.getContent();
+        List<ProductResponse> productResponse = productList.stream().map(this::mapToResponse).toList();
+        return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",200,productResponse),HttpStatus.OK);
     }
 
     private Image saveImageFile(MultipartFile file, Product product){

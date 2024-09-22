@@ -30,6 +30,6 @@ public class ProductRequest {
     private Integer quantity;
     @NotNull(message = "Danh mục sản phẩm không được để trống")
     private Long category;
-    private Integer Status;
+    private Integer status;
     private List<MultipartFile> images;
 }

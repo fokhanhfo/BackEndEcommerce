@@ -39,11 +39,12 @@ public class CustomJwtDecoder implements JwtDecoder {
 
         if (Objects.isNull(nimbusJwtDecoder)) {
             SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
-            nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
+            nimbusJwtDecoder = NimbusJwtDecoder
+                    .withSecretKey(secretKeySpec)
                     .macAlgorithm(MacAlgorithm.HS512)
                     .build();
         }
-
+//        trả về 1 đối tượng jwt mà trong đó thông tin đã xác thực
         return nimbusJwtDecoder.decode(token);
     }
 }
