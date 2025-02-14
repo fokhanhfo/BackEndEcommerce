@@ -1,0 +1,25 @@
+package com.projectRestAPI.MyShop.controller.Discount;
+
+import com.projectRestAPI.MyShop.dto.request.Discount.DiscountRequest;
+import com.projectRestAPI.MyShop.dto.response.ResponseObject;
+import com.projectRestAPI.MyShop.model.Discount.Discount;
+import com.projectRestAPI.MyShop.service.DiscountService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/discount")
+public class DiscountController {
+    @Autowired
+    private DiscountService discountService;
+
+    @PostMapping
+    private ResponseEntity<ResponseObject> add(@RequestBody @Valid DiscountRequest discountRequest){
+        return discountService.add(discountRequest);
+    }
+}
