@@ -1,5 +1,6 @@
 package com.projectRestAPI.MyShop.dto.request;
 
+import com.projectRestAPI.MyShop.model.SanPham.Size;
 import lombok.*;
 
 @NoArgsConstructor
@@ -11,6 +12,10 @@ public class CartRequest {
     private Long id;
 
     private Integer quantity;
+
+    private SizeRequest size;
+
+    private ColorRequest color;
 
     private ProductDetailRequest productDetail;
 

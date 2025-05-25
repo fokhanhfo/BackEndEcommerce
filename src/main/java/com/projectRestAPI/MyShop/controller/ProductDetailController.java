@@ -28,13 +28,10 @@ public class ProductDetailController {
     public ResponseEntity<ResponseObject> add(@ModelAttribute @Valid ProductDetailMappingRequest productDetailMappingRequest) throws JsonProcessingException {
         ProductDetailRequest productDetailRequest = productDetailMapper.toProductDetailRequest(productDetailMappingRequest);
         productDetailRequest.setProduct(
-                objectMapper.readValue(productDetailMappingRequest.getProduct(), ProductRequest.class)
+                objectMapper.readValue(productDetailMappingRequest.getProduct(), ProductShortRequest.class)
         );
         productDetailRequest.setColor(objectMapper.readValue(
                 productDetailMappingRequest.getColor(), ColorRequest.class)
-        );
-        productDetailRequest.setSize(objectMapper.readValue(
-                productDetailMappingRequest.getSize(), SizeRequest.class)
         );
         return productDetailService.add(productDetailRequest);
     }
@@ -43,13 +40,10 @@ public class ProductDetailController {
     public ResponseEntity<ResponseObject> update(@ModelAttribute @Valid ProductDetailMappingRequest productDetailMappingRequest) throws JsonProcessingException {
         ProductDetailRequest productDetailRequest = productDetailMapper.toProductDetailRequest(productDetailMappingRequest);
         productDetailRequest.setProduct(
-                objectMapper.readValue(productDetailMappingRequest.getProduct(), ProductRequest.class)
+                objectMapper.readValue(productDetailMappingRequest.getProduct(), ProductShortRequest.class)
         );
         productDetailRequest.setColor(objectMapper.readValue(
                 productDetailMappingRequest.getColor(), ColorRequest.class)
-        );
-        productDetailRequest.setSize(objectMapper.readValue(
-                productDetailMappingRequest.getSize(), SizeRequest.class)
         );
         return productDetailService.add(productDetailRequest);
     }

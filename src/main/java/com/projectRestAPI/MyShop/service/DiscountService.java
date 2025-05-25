@@ -12,7 +12,7 @@ import java.util.List;
 public interface DiscountService extends BaseService<Discount,Long> {
     ResponseEntity<ResponseObject> add(DiscountRequest discountRequest);
 
-    //    ResponseEntity<ResponseObject> getAll();
+    ResponseEntity<ResponseObject> getAllUser();
 //
     ResponseEntity<ResponseObject> getId(Long id);
     //

@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -97,19 +98,46 @@ public class BaseServiceImpl<E extends BaseEntity,ID extends Serializable,R exte
         params.forEach(specification::add);
 
         Sort sortCriteria = Sort.unsorted();
+
         if (!sort.isEmpty()) {
-            sortCriteria = sort.stream()
-                    .map(s -> {
-                        String[] parts = s.split(":");
-                        String field = parts[0];
-                        Sort.Direction direction = parts.length > 1 && "DESC".equalsIgnoreCase(parts[1])
-                                ? Sort.Direction.DESC
-                                : Sort.Direction.ASC;
-                        return Sort.by(direction, field);
-                    })
+            List<Sort> sortList = new ArrayList<>();
+
+            for (String s : sort) {
+                if ("hasDiscount".equals(s)) {
+                    // Ưu tiên sản phẩm có giảm giá (giảm giá nào có id sẽ lên trước)
+                    sortList.add(Sort.by(Sort.Order.desc("productDiscountPeriods.id")));
+                    continue;
+                }
+
+                String[] parts = s.split(":");
+                String field = parts[0];
+                Sort.Direction direction = (parts.length > 1 && "DESC".equalsIgnoreCase(parts[1]))
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
+
+                sortList.add(Sort.by(direction, field));
+            }
+
+            // Gộp tất cả sort lại
+            sortCriteria = sortList.stream()
                     .reduce(Sort::and)
                     .orElse(Sort.unsorted());
         }
+//        for (String s : sort) {
+//            if ("hasDiscount".equals(s)) {
+//                // Ưu tiên sản phẩm có giảm giá (sản phẩm nào có join với DiscountPeriod thì lên trước)
+//                sortCriteria = sortCriteria.and(Sort.by(Sort.Order.desc("productDiscountPeriods.id")));
+//            } else {
+//                String[] parts = s.split(":");
+//                String field = parts[0];
+//                Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("DESC"))
+//                        ? Sort.Direction.DESC
+//                        : Sort.Direction.ASC;
+//                sortCriteria = sortCriteria.and(Sort.by(direction, field));
+//            }
+//        }
+
+
 
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortCriteria);
 

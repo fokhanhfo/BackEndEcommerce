@@ -10,6 +10,9 @@ import lombok.*;
 @Builder
 public class ImageResponse {
     private Long id;
-    private String urlFile;
-    private ColorResponse colorResponse;
+    private String imageUrl;
+    private ProductDetailResponse productDetail;
+    private ColorResponse color;
+    private boolean mainColor;
+    private boolean mainProduct;
 }

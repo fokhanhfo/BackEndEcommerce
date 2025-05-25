@@ -1,6 +1,7 @@
 package com.projectRestAPI.MyShop.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.projectRestAPI.MyShop.model.DiscountPeriod.ProductDiscountPeriod;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,4 +33,8 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ProductDetail> productDetails;
+
+    @OneToMany(mappedBy = "product")
+    private List<ProductDiscountPeriod> productDiscountPeriods;
+
 }

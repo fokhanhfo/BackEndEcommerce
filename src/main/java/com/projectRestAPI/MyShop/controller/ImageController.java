@@ -26,9 +26,14 @@ public class ImageController {
         return imageService.getImage(filename);
     }
 
+    @GetMapping("/productDetail/{id}")
+    public  ResponseEntity<?> getImageAllProductDetail(@PathVariable Long id){
+        return imageService.getAllProductDetail(id);
+    }
+
     @GetMapping("/product/{id}")
-    public  ResponseEntity<?> getImageAll(@PathVariable Long id){
-        return imageService.getAllImagesByProductId(id);
+    public  ResponseEntity<?> getImageAllProduct(@PathVariable Long id){
+        return imageService.getAllProduct(id);
     }
 
     @PutMapping("/{id}")

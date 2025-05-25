@@ -1,6 +1,7 @@
 package com.projectRestAPI.MyShop.dto.response;
 
-import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
+import com.projectRestAPI.MyShop.model.SanPham.Color;
+import com.projectRestAPI.MyShop.model.SanPham.Size;
 import lombok.*;
 
 @NoArgsConstructor
@@ -13,5 +14,10 @@ public class CartResponse {
     private Long id;
     private Integer quantity;
     private ProductDetailResponse productDetail;
+
+    private ColorResponse color;
+
+    private SizeResponse size;
+
     private Integer status;
 }

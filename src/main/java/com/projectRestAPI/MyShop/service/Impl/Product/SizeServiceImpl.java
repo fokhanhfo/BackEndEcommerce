@@ -6,6 +6,7 @@ import com.projectRestAPI.MyShop.dto.request.SearchCriteria;
 import com.projectRestAPI.MyShop.dto.request.SizeRequest;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.mapper.SizeMapper;
+import com.projectRestAPI.MyShop.model.SanPham.Color;
 import com.projectRestAPI.MyShop.model.SanPham.Size;
 import com.projectRestAPI.MyShop.repository.SizeRepository;
 import com.projectRestAPI.MyShop.service.Impl.BaseServiceImpl;
@@ -23,6 +24,17 @@ import java.util.Optional;
 public class SizeServiceImpl extends BaseServiceImpl<Size,Long, SizeRepository> implements SizeService {
     @Autowired
     private SizeMapper sizeMapper;
+
+    @Override
+    public ResponseEntity<ResponseObject> getAll() {
+        List<Size> sizes = findAll();
+        return new ResponseEntity<>(new ResponseObject(
+                "Succes",
+                "Lấy dữ liệu thành công",
+                200,sizes)
+                , HttpStatus.OK);
+    }
+
     @Override
     public ResponseEntity<ResponseObject> add(SizeRequest sizeRequest) {
         Size size = sizeMapper.toSize(sizeRequest);

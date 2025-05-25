@@ -14,12 +14,15 @@ import java.util.List;
 @Builder
 public class BillResponse {
     private Long id;
+    private String fullName;
     private String phone;
     private String email;
-    private int status;
+    private Integer status;
     private String address;
     private BigDecimal total_price;
+    private Integer payMethod;
+    private String note;
     private LocalDateTime createdDate;
-    private UserResponse userResponse;
+    private UserResponse user;
     private List<BillDetailResponse> billDetail;
 }

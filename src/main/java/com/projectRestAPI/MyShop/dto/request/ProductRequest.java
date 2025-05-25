@@ -22,6 +22,8 @@ public class ProductRequest {
     @NotNull(message = "Danh mục sản phẩm không được để trống")
     private CategoryRequest category;
     private Integer status;
+    private Long isMainProductId;
+    private String isMainProductIdNew;
     // private List<MultipartFile> images;
     private List<ProductDetailRequest> productDetails;
 }

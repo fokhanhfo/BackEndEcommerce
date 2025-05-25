@@ -11,7 +11,8 @@ import java.util.List;
 public interface UserMapper {
     UserResponse toUserResponse(Users users);
 
-//    List<Users> toListUsers(List<UserRequest> userRequests);
+    Users toUsers(UserRequest userRequest);
+    List<Users> toListUsers(List<UserRequest> userRequests);
 
     List<UserResponse> toListUserResponse(List<Users> users);
 }

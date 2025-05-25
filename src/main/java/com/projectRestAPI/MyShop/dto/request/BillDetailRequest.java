@@ -10,7 +10,11 @@ import lombok.*;
 public class BillDetailRequest {
     private Long id;
 
-    private Long productId;
+    private Long productDetailId;
+
+    private Integer size;
+
+    private String color;
 
     private Integer quantity;
 }

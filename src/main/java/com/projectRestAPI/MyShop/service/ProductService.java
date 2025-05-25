@@ -8,17 +8,20 @@ import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.model.Product;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ProductService extends BaseService<Product,Long> {
-    ResponseEntity<ResponseObject> addProduct(ProductRequest productRequest);
+    ResponseEntity<ResponseObject> addProduct(ProductRequest productRequest,MultiValueMap<String, MultipartFile> productDetails);
 
     ResponseEntity<ResponseObject> getAll();
 
     ResponseEntity<ResponseObject> getId(Long id);
 
-    ResponseEntity<ResponseObject> updateProduct(ProductRequest productRequest);
+    ResponseEntity<ResponseObject> update(ProductRequest productRequest, MultiValueMap<String, MultipartFile> productDetails);
 
     ResponseEntity<ResponseObject> updateStatus(Long id,Integer status);
 

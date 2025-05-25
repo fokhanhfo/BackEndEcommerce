@@ -20,12 +20,23 @@ public class Image extends BaseEntity {
     @Lob
     @Column(length = Integer.MAX_VALUE)
     private byte[] file;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_detail_id")
+    private ProductDetail productDetail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "color_id")
     private Color color;
+
+    @Column(name = "is_main_product")
+    private boolean mainProduct;
+
+    @Column(name = "is_main_color")
+    private boolean mainColor;
 
 }

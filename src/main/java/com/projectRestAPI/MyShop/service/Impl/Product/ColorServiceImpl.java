@@ -26,6 +26,18 @@ import java.util.Optional;
 public class ColorServiceImpl extends BaseServiceImpl<Color,Long, ColorRepository> implements ColorService {
     @Autowired
     private ColorMapper colorMapper;
+
+    @Override
+    public ResponseEntity<ResponseObject> getAll() {
+        List<Color> colors = findAll();
+        return new ResponseEntity<>(new ResponseObject(
+                "Succes",
+                "Lấy dữ liệu thành công",
+                200,colors)
+                , HttpStatus.OK);
+
+    }
+
     @Override
     public ResponseEntity<ResponseObject> add(ColorRequest colorRequest) {
         Color color = colorMapper.toColor(colorRequest);

@@ -12,7 +12,7 @@ import java.util.List;
 public interface SizeService extends BaseService<Size,Long> {
     ResponseEntity<ResponseObject> add(SizeRequest sizeRequest);
 
-//    ResponseEntity<ResponseObject> getAll();
+    ResponseEntity<ResponseObject> getAll();
 //
     ResponseEntity<ResponseObject> getId(Long id);
 //

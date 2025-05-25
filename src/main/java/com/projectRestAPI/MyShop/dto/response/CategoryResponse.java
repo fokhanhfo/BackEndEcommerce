@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @ToString
 public class CategoryResponse {
+    private Long id;
     private String name;
     private String description;
 }

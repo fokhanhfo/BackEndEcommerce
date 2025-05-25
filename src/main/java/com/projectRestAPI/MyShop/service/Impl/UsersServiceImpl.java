@@ -1,6 +1,7 @@
 package com.projectRestAPI.MyShop.service.Impl;
 
 
+import com.projectRestAPI.MyShop.dto.request.SearchCriteria;
 import com.projectRestAPI.MyShop.dto.request.UserRequest;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.dto.response.UserResponse;
@@ -14,6 +15,8 @@ import com.projectRestAPI.MyShop.repository.UsersRepository;
 import com.projectRestAPI.MyShop.service.UsersService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,6 +49,23 @@ public class UsersServiceImpl extends BaseServiceImpl<Users,Long, UsersRepositor
                 .data(userResponses)
                 .build();
         return new ResponseEntity<>(responseObject,HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getAll(List<SearchCriteria> params, Pageable pageable, List<String> sort) {
+        Page<Users> response = getAll(params,pageable,sort,null);
+        List<Users> users = response.getContent();
+        List<UserResponse> userResponses =userMapper.toListUserResponse(users);
+        ResponseObject responseObject = ResponseObject.builder()
+                .status("Success")
+                .message("Lấy dữ liệu thành công")
+                .errCode(200)
+                .data(new HashMap<String,Object>(){{
+                    put("users",userResponses);
+                    put("count",response.getTotalElements());
+                }})
+                .build();
+        return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
     @Autowired
