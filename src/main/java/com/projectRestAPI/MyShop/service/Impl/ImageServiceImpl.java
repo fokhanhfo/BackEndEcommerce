@@ -106,8 +106,18 @@ public class ImageServiceImpl extends BaseServiceImpl<Image,Long, ImageRepositor
     }
 
     @Override
-    public ResponseEntity<ResponseObject> getAllImagesByProductId(Long productId){
-        List<Image> images = repository.findByProductId(productId);
+    public ResponseEntity<ResponseObject> getAllProductDetail(Long productDetailId){
+        List<Image> images = repository.findByProductDetailId(productDetailId);
+        if (images.isEmpty()) {
+            throw new AppException(ErrorCode.IMAGE_NOT_FOUND);
+        }
+        List<ImageResponse> imageResponse = images.stream().map(this::convertToImageResponse).collect(Collectors.toList());
+        return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",1,imageResponse),HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getAllProduct(Long productDetail) {
+        List<Image> images = repository.findByProductId(productDetail);
         if (images.isEmpty()) {
             throw new AppException(ErrorCode.IMAGE_NOT_FOUND);
         }
@@ -159,8 +169,8 @@ public class ImageServiceImpl extends BaseServiceImpl<Image,Long, ImageRepositor
     public ImageResponse convertToImageResponse(Image image) {
         ImageResponse imageResponse = ImageResponse.builder()
                 .id(image.getId())
-                .urlFile("http://localhost:8080/image/" + image.getName())
-                .colorResponse(colorMapper.toColorResponse(image.getColor()))
+                .mainColor(image.isMainColor())
+                .mainProduct(image.isMainProduct())
                 .build();
         return imageResponse;
     }

@@ -40,8 +40,16 @@ public enum ErrorCode {
     //size
     SIZE_NOT_FOUND(404, "Size not found", HttpStatus.NOT_FOUND),
 
-    //discount
+    //discountUser
     DISCOUNT_NOT_FOUND(404, "Discount not found", HttpStatus.NOT_FOUND),
+
+    //discount
+    DISCOUNT_USER_NOT_FOUND(404, "Discount user not found", HttpStatus.NOT_FOUND),
+
+    //discountPeriod
+    DISCOUNT_PERIOD_NOT_FOUND(404, "Discount Period not found", HttpStatus.NOT_FOUND),
+    DUPLICATE_DISCOUNT_CODE(400, "Mã giảm giá đã tồn tại", HttpStatus.BAD_REQUEST)
+
 
     ;
     private int code;

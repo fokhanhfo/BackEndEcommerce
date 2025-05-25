@@ -7,8 +7,15 @@ import com.projectRestAPI.MyShop.dto.request.BillRequest;
 import com.projectRestAPI.MyShop.dto.request.CartRequest;
 import com.projectRestAPI.MyShop.dto.request.SearchCriteria;
 import com.projectRestAPI.MyShop.dto.response.*;
+import com.projectRestAPI.MyShop.mapper.Bill.BillMapper;
+import com.projectRestAPI.MyShop.mapper.CartMapper;
+import com.projectRestAPI.MyShop.mapper.ImageMapper;
 import com.projectRestAPI.MyShop.model.*;
+import com.projectRestAPI.MyShop.model.Discount.DiscountUser;
+import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import com.projectRestAPI.MyShop.repository.BillRepository;
+import com.projectRestAPI.MyShop.repository.Discount.DiscountUserRepository;
+import com.projectRestAPI.MyShop.repository.ProductDetailRepository;
 import com.projectRestAPI.MyShop.repository.ProductRepository;
 import com.projectRestAPI.MyShop.repository.UsersRepository;
 import com.projectRestAPI.MyShop.service.*;
@@ -36,11 +43,28 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
     @Autowired
     private ProductRepository productRepository;
     @Autowired
+    private ProductDetailRepository productDetailRepository;
+    @Autowired
     private ProductService productService;
+    @Autowired
+    private ProductDetailService productDetailService;
     @Autowired
     private UsersRepository usersRepository;
     @Autowired
     private ModelMapper mapper;
+
+    @Autowired
+    private CartMapper cartMapper;
+
+    @Autowired
+    private ImageMapper imageMapper;
+
+    @Autowired
+    private BillMapper billMapper;
+
+    @Autowired
+    private DiscountUserRepository discountUserRepository;
+
     private final String UrlBase="http://localhost:8080/image/";
     // biến ROLE_NAME cần cho vào aplication
     protected static final List<String> ROLE_NAMES = Arrays.asList("ADMIN", "MANAGER", "EMPLOYEE");
@@ -85,15 +109,17 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
         Users users = usersRepository.findByUsername(userName).orElseThrow(()->
                 new AppException(ErrorCode.USER_NOT_FOUND)
         );
-        Page<Bill> response = getAll(params, pageable, sort, users);
-        List<BillResponse> billResponses = response.getContent().stream().map(this::mapToResponse).toList();
+        Page<Bill> billPage = getAll(params, pageable, sort, users);
+//        List<BillResponse> billResponses = response.getContent().stream().map(this::mapToResponse).toList();
+        List<Bill> bills = billPage.getContent();
+        List<BillResponse> billResponses = billMapper.toListBillResponse(bills);
         ResponseObject responseObject = ResponseObject.builder()
                 .status("Success")
                 .message("Lấy dữ liệu thành công")
                 .errCode(200)
                 .data(new HashMap<String,Object>(){{
                     put("bill",billResponses);
-                    put("count",response.getTotalElements());
+                    put("count",billPage.getTotalElements());
                 }})
                 .build();
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
@@ -102,15 +128,16 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
     @Override
     public ResponseEntity<?> saveBill(BillRequest billRequest) {
         Users user = usersService.getUser();
-        List<Cart> carts = billRequest.getCartRequests().stream()
-                .map(cartRequest -> cartService.findById(cartRequest.getId())
-                        .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND)))
-                .toList();
-        for (Cart cart : carts){
-            if (cart.getUser() != user){
-                throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-        }
+//        List<Cart> carts = billRequest.getCartRequests().stream()
+//                .map(cartRequest -> cartService.findById(cartRequest.getId())
+//                        .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND)))
+//                .toList();
+        List<Cart> carts = cartMapper.toListCart(billRequest.getCartRequests());
+//        for (Cart cart : carts){
+//            if (cart.getUser() != user && cart.getId() != null){
+//                throw new AppException(ErrorCode.UNAUTHORIZED);
+//            }
+//        }
         Bill bill = mapper.map(billRequest,Bill.class);
         bill.setStatus(0);
 //        bill.setTotal_price(totalPrice(billRequest.getCartRequests()));
@@ -118,9 +145,21 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
         bill.setCreatedDate(LocalDateTime.now());
         List<BillDetail> billDetails = billRequest.getCartRequests().stream().map(cartRequest -> saveBillDetail(bill,cartRequest)).toList();
         bill.setBillDetail(billDetails);
-        createNew(bill);
-        BillResponse billResponse = mapToResponse(bill);
-        return new ResponseEntity<>(new ResponseObject("Succes","Lập hóa đơn thành công",200,billResponse), HttpStatus.OK);
+        Bill bill1 = repository.save(bill);
+        List<DiscountUser> discountUsers = billRequest.getDiscountId().stream()
+                .map(item -> discountUserRepository.findById(item)
+                        .map(discountUser -> {
+                            discountUser.setUsed(true);
+                            discountUser.setBillId(bill1.getId());
+                            // Cập nhật trạng thái Used
+                            return discountUser;
+                        })
+                        .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_USER_NOT_FOUND))
+                )
+                .toList();
+        discountUserRepository.saveAll(discountUsers);
+//        BillResponse billResponse = mapToResponse(bill);
+        return new ResponseEntity<>(new ResponseObject("Succes","Lập hóa đơn thành công",200,null), HttpStatus.OK);
     }
 
     @Override
@@ -153,14 +192,20 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
     }
 
     private BillDetail saveBillDetail(Bill bill,CartRequest cartRequest){
-        Product product = productRepository.findById(cartRequest.getProductDetail().getId()).orElseThrow(()->new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        ProductDetail productDetail = productDetailRepository.findById(cartRequest.getProductDetail().getId()).orElseThrow(()->new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         BillDetail billDetail = BillDetail.builder()
-                .productId(product)
+                .productDetail(productDetail)
                 .quantity(cartRequest.getQuantity())
+                .color(cartRequest.getColor().getName())
+                .size(cartRequest.getSize().getName())
                 .bill(bill)
                 .build();
-        cartService.delete(cartRequest.getId());
-        productService.createNew(product);
+//        if (cartRequest.getId() != null){
+//            cartService.delete(cartRequest.getId());
+//        }
+        Optional.ofNullable(cartRequest.getId())
+                .ifPresent(cartService::delete);
+        productDetailService.createNew(productDetail);
         return billDetail;
     }
 
@@ -179,28 +224,26 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
         Users users = usersService.getUser();
 
         UserResponse userResponse = usersService.validUser(users);
-        billResponse.setUserResponse(userResponse);
+        billResponse.setUser(userResponse);
 
-        List<Product> products = bill.getBillDetail().stream()
-                .map(BillDetail::getProductId)
+        List<ProductDetail> productDetails = bill.getBillDetail().stream()
+                .map(BillDetail::getProductDetail)
                 .toList();
 
         for (BillDetailResponse billDetailResponse : billResponse.getBillDetail()) {
-            Product product = findProductById(products, billDetailResponse.getProductId().getId());
-//            if (product != null) {
-//                List<String> imageUrl = product.getImages().stream()
-//                        .map(image -> UrlBase + image.getName())
-//                        .toList();
-//                billDetailResponse.getProductId().setImagesUrl(imageUrl);
-//            }
+            ProductDetail productDetail = findProductById(productDetails, billDetailResponse.getProductDetail().getId());
+            if (productDetail != null) {
+                List<ImageResponse> imageResponses = imageMapper.toListImageResponse(productDetail.getImage());
+                billDetailResponse.getProductDetail().setImage(imageResponses);
+            }
         }
 
         return billResponse;
     }
 
 
-    private Product findProductById(List<Product> products,Long productId){
-        return products.stream().filter(product -> product.getId().equals(productId)).findFirst().orElse(null);
+    private ProductDetail findProductById(List<ProductDetail> productDetails,Long productId){
+        return productDetails.stream().filter(productDetail -> productDetail.getId().equals(productId)).findFirst().orElse(null);
     }
 
 }

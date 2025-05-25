@@ -8,6 +8,8 @@ import com.projectRestAPI.MyShop.dto.response.ProductDetailResponse;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.mapper.ProductDetailMapper;
 import com.projectRestAPI.MyShop.model.Image;
+import com.projectRestAPI.MyShop.model.Product;
+import com.projectRestAPI.MyShop.model.SanPham.Color;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import com.projectRestAPI.MyShop.repository.ImageRepository;
 import com.projectRestAPI.MyShop.repository.ProductDetailRepository;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,9 +42,9 @@ public class ProductDetailServiceImpl extends BaseServiceImpl<ProductDetail,Long
     @Override
     public ResponseEntity<ResponseObject> add(ProductDetailRequest productDetailRequest) {
         ProductDetail productDetail = productDetailMapper.toProductDetail(productDetailRequest);
-        Image image = saveImageFile(productDetailRequest.getImage(), productDetail);
-        imageRepository.save(image);
-        productDetail.setImage(image);
+//        List<Image> image = saveImageFiles(productDetailRequest.getImage(), productDetail.getProduct(),productDetail.getColor());
+//        imageRepository.saveAll(image);
+//        productDetail.setImage(image);
 //        Category category = categoryMapper.toCategory(productRequest.getCategory());
 //        category.setId(productRequest.getCategory().getId());
 //        product.setCategory(category);
@@ -94,27 +97,33 @@ public class ProductDetailServiceImpl extends BaseServiceImpl<ProductDetail,Long
 //        return null;
 //    }
 
-    private Image saveImageFile(MultipartFile file, ProductDetail productDetail){
-        if(file != null && !file.isEmpty()){
-            String fileType = file.getContentType();
-            if(isValidImageOrVideo(fileType)){
-                try {
-                    String fileName = writeFile(file);
-                    Image image = Image.builder()
-                            .name(fileName)
-                            .file(file.getBytes())
-                            .type(fileType)
-                            .product(productDetail.getProduct())
-                            .build();
-                    return image;
-                }catch (IOException e){
-                    throw new AppException(ErrorCode.READ_WRITE_ERROR);
+    private List<Image> saveImageFiles(MultipartFile[] files, Product product, Color color) {
+        List<Image> savedImages = new ArrayList<>();
+
+        if (files != null) {
+            for (MultipartFile file : files) {
+                if (file != null && !file.isEmpty()) {
+                    String fileType = file.getContentType();
+                    if (isValidImageOrVideo(fileType)) {
+                        try {
+                            String fileName = writeFile(file);
+                            Image image = Image.builder()
+                                    .name(fileName)
+                                    .file(file.getBytes())
+                                    .type(fileType)
+                                    .product(product)
+                                    .build();
+                            savedImages.add(image);
+                        } catch (IOException e) {
+                            throw new AppException(ErrorCode.READ_WRITE_ERROR);
+                        }
+                    } else {
+                        throw new RuntimeException("Invalid file type. Only image and video files are allowed.");
+                    }
                 }
             }
-        }else {
-            throw new RuntimeException("Invalid file type. Only image and video files are allowed.");
         }
-        return null;
+        return savedImages;
     }
 
     public boolean isValidImageOrVideo(String fileType) {

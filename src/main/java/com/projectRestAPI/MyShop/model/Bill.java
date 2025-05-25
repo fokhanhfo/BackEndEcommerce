@@ -17,6 +17,9 @@ import java.util.List;
 @Getter
 @Setter
 public class Bill extends BaseEntity{
+    @Column(name = "fullName")
+    private String fullname;
+
     @Column(name = "phone")
     private String phone;
 
@@ -28,6 +31,12 @@ public class Bill extends BaseEntity{
 
     @Column(name = "address")
     private String address;
+
+    @Column(name = "note")
+    private String note;
+
+    @Column(name = "pay_method")
+    private Integer payMethod;
 
     @Column(name = "total_price")
     private BigDecimal total_price;

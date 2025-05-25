@@ -10,5 +10,7 @@ import java.util.Optional;
 public interface ImageRepository extends BaseRepository<Image,Long> {
     List<Image> findByProductId(Long id);
 
+    List<Image> findByProductDetailId(Long id);
+
     Optional<Image> findByName(String name);
 }

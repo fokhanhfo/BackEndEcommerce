@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,4 +33,6 @@ public class DiscountResponse {
     private LocalDateTime endTime;
 
     private Integer status;
+
+    private List<DiscountUserResponse> discountUsers;
 }

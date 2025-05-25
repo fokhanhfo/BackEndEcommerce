@@ -1,5 +1,6 @@
 package com.projectRestAPI.MyShop.model;
 
+import com.projectRestAPI.MyShop.model.Discount.DiscountUser;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -40,4 +41,8 @@ public class Users extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_image_id", unique = true)
     private UserImage userImage;
+
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DiscountUser> discountUsers;
+
 }

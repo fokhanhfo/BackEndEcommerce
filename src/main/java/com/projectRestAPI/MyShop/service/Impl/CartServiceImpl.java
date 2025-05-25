@@ -7,6 +7,8 @@ import com.projectRestAPI.MyShop.dto.response.CartResponse;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.enums.StatusCart;
 import com.projectRestAPI.MyShop.mapper.CartMapper;
+import com.projectRestAPI.MyShop.mapper.ColorMapper;
+import com.projectRestAPI.MyShop.mapper.SizeMapper;
 import com.projectRestAPI.MyShop.model.*;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import com.projectRestAPI.MyShop.repository.CartRepository;
@@ -46,6 +48,12 @@ public class CartServiceImpl extends BaseServiceImpl<Cart,Long, CartRepository> 
     @Autowired
     private CartMapper cartMapper;
 
+    @Autowired
+    private ColorMapper colorMapper;
+
+    @Autowired
+    private SizeMapper sizeMapper;
+
     private final String UrlBase="http://localhost:8080/image/";
 
     @Override
@@ -84,6 +92,8 @@ public class CartServiceImpl extends BaseServiceImpl<Cart,Long, CartRepository> 
                     .productDetail(productDetail)
                     .quantity(cartRequest.getQuantity())
                     .user(user)
+                    .color(colorMapper.toColor(cartRequest.getColor()))
+                    .size(sizeMapper.toSize(cartRequest.getSize()))
                     .status(StatusCart.CART_NOT_SELECT.getStatus())
                     .build();
             createNew(cart);
@@ -108,9 +118,9 @@ public class CartServiceImpl extends BaseServiceImpl<Cart,Long, CartRepository> 
             return new ResponseEntity<>(new ResponseObject("error", "Sản phẩm không tồn tại trong giỏ hàng user", 400, null), HttpStatus.BAD_REQUEST);
         }
         ProductDetail productDetail = productDetailRepository.findById(cart.getProductDetail().getId()).get();
-        if(productDetail.getQuantity() < cartRequest.getQuantity()){
-            return new ResponseEntity<>(new ResponseObject("0","Sản phẩm còn " + productDetail.getQuantity(),400,null), HttpStatus.BAD_REQUEST);
-        }
+//        if(productDetail.getQuantity() < cartRequest.getQuantity()){
+//            return new ResponseEntity<>(new ResponseObject("0","Sản phẩm còn " + productDetail.getQuantity(),400,null), HttpStatus.BAD_REQUEST);
+//        }
         cart.setQuantity(cartRequest.getQuantity());
         cart.setStatus(cartRequest.getStatus());
         update(cart);

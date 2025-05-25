@@ -16,6 +16,11 @@ public class SizeController {
     @Autowired
     private SizeService sizeService;
 
+    @GetMapping
+    public ResponseEntity<ResponseObject> getAll(){
+        return sizeService.getAll();
+    }
+
     @PostMapping
     public ResponseEntity<ResponseObject> add(@RequestBody @Valid SizeRequest sizeRequest){
         return sizeService.add(sizeRequest);

@@ -2,6 +2,7 @@ package com.projectRestAPI.MyShop.model.SanPham;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.projectRestAPI.MyShop.model.BaseEntity;
 import com.projectRestAPI.MyShop.model.Image;
 import com.projectRestAPI.MyShop.model.Product;
@@ -27,9 +28,9 @@ public class ProductDetail extends BaseEntity {
     private BigDecimal importPrice;
     @Column(name = "selling_price")
     private BigDecimal sellingPrice;
-
-    @Column(name = "quantity")
-    private Integer quantity;
+//
+//    @Column(name = "quantity")
+//    private Integer quantity;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -40,13 +41,17 @@ public class ProductDetail extends BaseEntity {
     @JoinColumn(name = "color_id")
     private Color color;
 
-    @ManyToOne
-    @JoinColumn(name = "size_id")
-    private Size size;
+//    @ManyToOne
+//    @JoinColumn(name = "size_id")
+//    private Size size;
 
-    @ManyToOne
-    @JoinColumn(name = "image_id")
-    private Image image;
+    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> image;
+
+    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<ProductDetailSize> productDetailSizes;
+
 
 //    public List<String> getImageNames(){
 //        return images.stream().map(Image::getName).collect(Collectors.toList());

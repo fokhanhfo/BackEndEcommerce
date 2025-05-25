@@ -13,7 +13,9 @@ public interface ImageService extends BaseService<Image,Long>{
     ResponseEntity<ResponseObject> addImage(Long idProduct, List<MultipartFile> files);
     ResponseEntity<?>  getImage(String name) throws IOException;
 
-    ResponseEntity<ResponseObject> getAllImagesByProductId(Long productId);
+    ResponseEntity<ResponseObject> getAllProductDetail(Long productDetail);
+
+    ResponseEntity<ResponseObject> getAllProduct(Long productDetail);
 
     ResponseEntity<ResponseObject> updateImageProduct(Long imageId,MultipartFile file);
 

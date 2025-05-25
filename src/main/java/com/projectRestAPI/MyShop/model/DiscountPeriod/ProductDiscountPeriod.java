@@ -1,6 +1,7 @@
 package com.projectRestAPI.MyShop.model.DiscountPeriod;
 
 import com.projectRestAPI.MyShop.model.BaseEntity;
+import com.projectRestAPI.MyShop.model.Product;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,18 +19,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ProductDisCountPeriod extends BaseEntity {
-    @Column(name = "start_time")
-    private LocalDateTime startTime;
+public class ProductDiscountPeriod extends BaseEntity {
 
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
+    @Column(name = "percentage_value")
+    private Integer percentageValue;
 
     @ManyToOne
-    @JoinColumn(name = "product_detail_id", referencedColumnName = "id")
-    private ProductDetail productDetail;
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     @ManyToOne
-    @JoinColumn(name = "discount_period_id", referencedColumnName = "id")
+    @JoinColumn(name = "discount_period_id")
     private DiscountPeriod discountPeriod;
 }

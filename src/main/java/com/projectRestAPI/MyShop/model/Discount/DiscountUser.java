@@ -24,6 +24,8 @@ public class DiscountUser extends BaseEntity {
 
     private Integer status;
 
+    private Long BillId;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users users;

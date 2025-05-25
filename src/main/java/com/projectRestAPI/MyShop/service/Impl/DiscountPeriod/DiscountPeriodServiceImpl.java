@@ -4,12 +4,16 @@ import com.projectRestAPI.MyShop.Exception.AppException;
 import com.projectRestAPI.MyShop.Exception.ErrorCode;
 import com.projectRestAPI.MyShop.dto.request.Discount.DiscountPeriodRequest;
 import com.projectRestAPI.MyShop.dto.request.SearchCriteria;
+import com.projectRestAPI.MyShop.dto.response.Discount.DiscountPeriodResponse;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
+import com.projectRestAPI.MyShop.mapper.DiscountPeriod.DiscountPeriodMapper;
 import com.projectRestAPI.MyShop.model.Discount.DiscountUser;
 import com.projectRestAPI.MyShop.model.DiscountPeriod.DiscountPeriod;
 import com.projectRestAPI.MyShop.repository.DiscountPeriod.DiscountPeriodRepository;
 import com.projectRestAPI.MyShop.service.DiscountPeriodService;
 import com.projectRestAPI.MyShop.service.Impl.BaseServiceImpl;
+import com.projectRestAPI.MyShop.utils.ResponseUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,22 +24,39 @@ import java.util.Optional;
 
 @Service
 public class DiscountPeriodServiceImpl extends BaseServiceImpl<DiscountPeriod,Long, DiscountPeriodRepository> implements DiscountPeriodService {
+
+    @Autowired
+    private DiscountPeriodRepository discountPeriodRepository;
+    @Autowired
+    private DiscountPeriodMapper discountPeriodMapper;
     @Override
-    public ResponseEntity<ResponseObject> add(DiscountPeriod discountPeriod) {
-        return createNew(discountPeriod);
+    public ResponseEntity<ResponseObject> add(DiscountPeriod discountPeriodRequest) {
+        Boolean existsByDiscountPeriodCode = discountPeriodRepository.existsByDiscountPeriodCode(discountPeriodRequest.getDiscountPeriodCode());
+        if(existsByDiscountPeriodCode){
+            throw new AppException(ErrorCode.DUPLICATE_DISCOUNT_CODE);
+        }
+        DiscountPeriod discountPeriodSave = discountPeriodRepository.save(discountPeriodRequest);
+        return ResponseUtil.buildResponse(
+                "success",
+                "Thêm dữ liệu thành công",
+                1,
+                null,
+                HttpStatus.OK
+        );
     }
 
     @Override
     public ResponseEntity<ResponseObject> getId(Long id) {
-        Optional<DiscountPeriod> discount = findById(id);
+        Optional<DiscountPeriod> discount = discountPeriodRepository.findById(id);
         if(discount.isEmpty()){
             throw new AppException(ErrorCode.DISCOUNT_NOT_FOUND);
         }
+        DiscountPeriodResponse discountPeriod = discountPeriodMapper.toDiscountPeriodResponse(discount.get());
         return new ResponseEntity<>(new ResponseObject(
                 "success",
                 "Lấy Thành Công",
                 1,
-                discount.get()
+                discountPeriod
         ), HttpStatus.OK);
     }
 

@@ -19,10 +19,11 @@ public class ProductDetailResponse {
     private Long id;
     private BigDecimal importPrice;
     private BigDecimal sellingPrice;
-    private Integer quantity;
+//    private Integer quantity;
     private ProductShortResponse product;
     private ColorRequest color;
-    private SizeRequest size;
+//    private SizeRequest size;
 
-    private String imagesUrl;
+    private List<ImageResponse> image;
+    private List<ProductDetailSizeResponse> productDetailSizes;
 }

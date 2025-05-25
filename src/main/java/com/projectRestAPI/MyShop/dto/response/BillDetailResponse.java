@@ -9,6 +9,8 @@ import lombok.*;
 @Builder
 public class BillDetailResponse {
     private Long id;
-    private ProductResponse productId;
+    private ProductDetailResponse productDetail;;
     private Integer quantity;
+    private String size;
+    private String color;
 }

@@ -1,6 +1,7 @@
 package com.projectRestAPI.MyShop.model;
 
 
+import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import com.projectRestAPI.MyShop.model.bill.ReturnInvoice;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
@@ -18,11 +19,17 @@ import java.math.BigDecimal;
 @Setter
 public class BillDetail extends BaseEntity{
     @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product productId;
+    @JoinColumn(name = "product_detail_id")
+    private ProductDetail productDetail;
 
     @Column(name = "quantity")
     private Integer quantity;
+
+    @Column(name = "size")
+    private String size;
+
+    @Column(name = "color")
+    private String color;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bill_id")

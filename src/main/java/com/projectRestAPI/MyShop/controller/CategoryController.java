@@ -30,10 +30,15 @@ public class CategoryController {
     }
 
 
+//    @GetMapping
+//    public ResponseEntity<ResponseObject> getAllCategory(){
+//        List<Category> categories = categoryService.findAll();
+//        return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",200,categories),HttpStatus.OK);
+//    }
+
     @GetMapping
     public ResponseEntity<ResponseObject> getAllCategory(){
-        List<Category> categories = categoryService.findAll();
-        return new ResponseEntity<>(new ResponseObject("Succes","Lấy dữ liệu thành công",200,categories),HttpStatus.OK);
+        return categoryService.getCategory();
     }
 
 //    @PreAuthorize("hasRole('ADMIN')")

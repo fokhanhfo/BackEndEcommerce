@@ -17,6 +17,11 @@ public class ColorController {
     @Autowired
     private ColorService colorService;
 
+    @GetMapping
+    public ResponseEntity<ResponseObject> getAll(){
+        return colorService.getAll();
+    }
+
     @PostMapping
     public ResponseEntity<ResponseObject> add(@RequestBody @Valid ColorRequest colorRequest){
         return colorService.add(colorRequest);

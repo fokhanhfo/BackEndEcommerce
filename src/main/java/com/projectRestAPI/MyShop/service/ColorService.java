@@ -12,7 +12,7 @@ import java.util.List;
 public interface ColorService extends BaseService<Color,Long> {
     ResponseEntity<ResponseObject> add(ColorRequest solorRequest);
 
-    //    ResponseEntity<ResponseObject> getAll();
+    ResponseEntity<ResponseObject> getAll();
 //
     ResponseEntity<ResponseObject> getId(Long id);
     //

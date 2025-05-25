@@ -17,7 +17,6 @@ public class ProductDetailMappingRequest {
     private BigDecimal sellingPrice;
     private String product; // JSON string
     private String color;   // JSON string
-    private String size;
+    private MultipartFile[] image;
 
-    private MultipartFile image;
 }
