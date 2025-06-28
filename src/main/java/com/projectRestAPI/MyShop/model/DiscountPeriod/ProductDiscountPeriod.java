@@ -1,16 +1,13 @@
 package com.projectRestAPI.MyShop.model.DiscountPeriod;
 
 import com.projectRestAPI.MyShop.model.BaseEntity;
-import com.projectRestAPI.MyShop.model.Product;
-import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
+import com.projectRestAPI.MyShop.model.SanPham.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
 
 @SuperBuilder
 @Entity

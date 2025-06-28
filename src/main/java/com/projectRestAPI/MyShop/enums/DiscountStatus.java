@@ -1,19 +1,16 @@
 package com.projectRestAPI.MyShop.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum DiscountStatus {
-    INACTIVE(0),
-    ACTIVE(1),
-    EXPIRED(2),
-    CANCELED(3);
+    INACTIVE(0),//chưa hoạt động
+    ACTIVE(1);// đang hoạt động
+//    EXPIRED(2),// đã hết hạn
+//    CANCELED(1);//đã bị hủy
 
-    private final int value;
-
-    DiscountStatus(int value) {
-        this.value = value;
-    }
-
-    public int getValue() {
-        return value;
-    }
+    private final Integer value;
 
 }

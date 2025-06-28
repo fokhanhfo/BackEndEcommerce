@@ -24,6 +24,8 @@ public class DiscountResponse {
     private BigDecimal discountCondition;
     private Integer quantity;
 
+    private Boolean enable;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startTime;

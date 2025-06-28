@@ -8,7 +8,9 @@ import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.enums.DiscountStatus;
 import com.projectRestAPI.MyShop.mapper.ProductMapper;
 import com.projectRestAPI.MyShop.model.Discount.DiscountUser;
+import com.projectRestAPI.MyShop.model.DiscountPeriod.DiscountPeriod;
 import com.projectRestAPI.MyShop.model.DiscountPeriod.ProductDiscountPeriod;
+import com.projectRestAPI.MyShop.repository.DiscountPeriod.DiscountPeriodRepository;
 import com.projectRestAPI.MyShop.repository.DiscountPeriod.ProductDiscountPeriodRepository;
 import com.projectRestAPI.MyShop.service.Impl.BaseServiceImpl;
 import com.projectRestAPI.MyShop.service.ProductDiscountPeriodService;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.awt.print.Pageable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,13 +32,26 @@ public class ProductDiscountPeriodServiceImpl extends BaseServiceImpl<ProductDis
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private DiscountPeriodRepository discountPeriodRepository;
+
     @Override
     public ResponseEntity<ResponseObject> add(ProductDiscountPeriod discountPeriod) {
         return createNew(discountPeriod);
     }
 
+
+
     @Override
     public ResponseEntity<ResponseObject> addAll(ProductDiscountPeriodAllRequest productDiscountPeriodAllRequest) {
+        DiscountPeriod discountPeriod = discountPeriodRepository.findById(productDiscountPeriodAllRequest.getDiscountPeriod().getId())
+                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_PERIOD_NOT_FOUND));
+        if (!Objects.equals(discountPeriod.getStatus(), DiscountStatus.ACTIVE.getValue())) {
+            throw new AppException(ErrorCode.DISCOUNT_PERIOD_INACTIVE);
+        }
+
+
+
         List<ProductDiscountPeriod> productDiscountPeriods = productDiscountPeriodAllRequest.getPercentageValue().stream()
                 .map(item -> ProductDiscountPeriod.builder()
                         .product(productMapper.toProduct(item.getProduct()))

@@ -20,6 +20,12 @@ public interface BillService extends BaseService<Bill,Long>{
 
     ResponseEntity<ResponseObject> getBillIdUser(BillParam billParam,Pageable pageable);
 
-    ResponseEntity<ResponseObject> UpdateStatus(Long bill_id,Integer status);
+    ResponseEntity<ResponseObject> UpdateStatus(Long bill_id,Integer status,String note);
+
+    ResponseEntity<ResponseObject> billStatistics();
+
+    public ResponseEntity<ResponseObject> getMonthlyStatistics(int year);
+
+    public ResponseEntity<ResponseObject> getRevenueByCategory(int year);
 
 }

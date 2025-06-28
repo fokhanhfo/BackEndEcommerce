@@ -37,6 +37,10 @@ public class SizeServiceImpl extends BaseServiceImpl<Size,Long, SizeRepository> 
 
     @Override
     public ResponseEntity<ResponseObject> add(SizeRequest sizeRequest) {
+        Boolean colorBoolean = repository.existsByName(sizeRequest.getName());
+        if(colorBoolean){
+            throw new AppException(ErrorCode.SIZE_ALREADY_EXISTS);
+        }
         Size size = sizeMapper.toSize(sizeRequest);
         return createNew(size);
     }
@@ -56,6 +60,10 @@ public class SizeServiceImpl extends BaseServiceImpl<Size,Long, SizeRepository> 
         Optional<Size> sizeOptional = findById(sizeRequest.getId());
         if (sizeOptional.isEmpty()) {
             throw new AppException(ErrorCode.SIZE_NOT_FOUND);
+        }
+
+        if (repository.existsByNameAndIdNot(sizeRequest.getName(), sizeRequest.getId())) {
+            throw new AppException(ErrorCode.DUPLICATE_NAME);
         }
 
         Size size = sizeMapper.toSize(sizeRequest);

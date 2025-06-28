@@ -1,14 +1,10 @@
 package com.projectRestAPI.MyShop.service.Impl.Product;
 
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
-import com.projectRestAPI.MyShop.model.Discount.DiscountUser;
-import com.projectRestAPI.MyShop.model.Product;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetailSize;
 import com.projectRestAPI.MyShop.repository.ProductDetailSizeRepository;
-import com.projectRestAPI.MyShop.repository.ProductRepository;
 import com.projectRestAPI.MyShop.service.Impl.BaseServiceImpl;
 import com.projectRestAPI.MyShop.service.ProductDetailSizeService;
-import com.projectRestAPI.MyShop.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

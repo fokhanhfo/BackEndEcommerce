@@ -8,7 +8,7 @@ import com.projectRestAPI.MyShop.dto.response.ProductDetailResponse;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.mapper.ProductDetailMapper;
 import com.projectRestAPI.MyShop.model.Image;
-import com.projectRestAPI.MyShop.model.Product;
+import com.projectRestAPI.MyShop.model.SanPham.Product;
 import com.projectRestAPI.MyShop.model.SanPham.Color;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import com.projectRestAPI.MyShop.repository.ImageRepository;
@@ -29,7 +29,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductDetailServiceImpl extends BaseServiceImpl<ProductDetail,Long, ProductDetailRepository> implements ProductDetailService {

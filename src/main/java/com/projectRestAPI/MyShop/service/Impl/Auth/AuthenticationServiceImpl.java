@@ -82,6 +82,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(!authenticated){
             return new ResponseEntity<>(new ResponseObject("400", "Tài khoản hoặc mật khẩu sai", 0, authenticationRequest), HttpStatus.BAD_REQUEST);
         }
+        if (!user.getEnable()) {
+            return new ResponseEntity<>(
+                    new ResponseObject("403", "Tài khoản chưa được kích hoạt", 0, user.getEmail()),
+                    HttpStatus.FORBIDDEN
+            );
+        }
         String token =generateToken(user);
 
         return new ResponseEntity<>(new ResponseObject("200", "Đăng nhập thành công", 0, token), HttpStatus.OK);
@@ -121,7 +127,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         .typeLogin(LoginType.FACEBOOK_LOGIN.getLoginType())
                         .password("khanhkomonny")
                         .build();
-                usersService.addUser(userRequest);
+                usersService.addUser(userRequest,null);
                 return authenticate(new AuthenticationRequest(faceBookUserRequest.getId(), "khanhkomonny"));
             }
             Users users = usersOptional.get();
@@ -190,7 +196,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope",buildScope(users))
                 .claim("fullName",users.getFullName())
+                .claim("gender",users.getGender())
                 .claim("email",users.getEmail())
+                .claim("image", users.getUserImage() != null
+                        ? "http://localhost:8080/userImage/" + users.getUserImage().getName()
+                        : null)
                 .build();
         Payload payload =new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject =new JWSObject(header,payload);

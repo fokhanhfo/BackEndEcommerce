@@ -19,8 +19,6 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-
-
     @PostMapping
     public ResponseEntity<?> add(@RequestBody Category category) {
         if(categoryService.isCategoryExists(category.getName())){
@@ -73,10 +71,6 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseObject> delete(@PathVariable Long id){
-        try{
             return categoryService.delete(id);
-        }catch (NoSuchElementException e){
-            return new ResponseEntity<>(new ResponseObject("Error","Không tìm thấy danh mục",400,null),HttpStatus.BAD_REQUEST);
-        }
     }
 }

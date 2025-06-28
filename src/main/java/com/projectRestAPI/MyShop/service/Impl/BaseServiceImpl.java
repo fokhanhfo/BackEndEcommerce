@@ -1,8 +1,11 @@
 package com.projectRestAPI.MyShop.service.Impl;
 
+import com.projectRestAPI.MyShop.Exception.AppException;
+import com.projectRestAPI.MyShop.Exception.ErrorCode;
 import com.projectRestAPI.MyShop.dto.request.SearchCriteria;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.model.BaseEntity;
+import com.projectRestAPI.MyShop.model.Category;
 import com.projectRestAPI.MyShop.model.Users;
 import com.projectRestAPI.MyShop.repository.BaseRepository;
 import com.projectRestAPI.MyShop.repository.EntitySpecification;
@@ -102,11 +105,12 @@ public class BaseServiceImpl<E extends BaseEntity,ID extends Serializable,R exte
         if (!sort.isEmpty()) {
             List<Sort> sortList = new ArrayList<>();
 
+            boolean hasDiscountPresent = false;
+
             for (String s : sort) {
                 if ("hasDiscount".equals(s)) {
-                    // Ưu tiên sản phẩm có giảm giá (giảm giá nào có id sẽ lên trước)
-                    sortList.add(Sort.by(Sort.Order.desc("productDiscountPeriods.id")));
-                    continue;
+                    hasDiscountPresent = true;
+                    continue; // xử lý riêng ở ngoài
                 }
 
                 String[] parts = s.split(":");
@@ -115,14 +119,26 @@ public class BaseServiceImpl<E extends BaseEntity,ID extends Serializable,R exte
                         ? Sort.Direction.DESC
                         : Sort.Direction.ASC;
 
-                sortList.add(Sort.by(direction, field));
+                if (!"id".equals(field)) {
+                    sortList.add(Sort.by(direction, field));
+                }
             }
 
-            // Gộp tất cả sort lại
+            // Thêm hasDiscount vào đầu (nếu có)
+            if (hasDiscountPresent) {
+                sortList.add(0, Sort.by(Sort.Order.desc("productDiscountPeriods.id")));
+            }
+
+            // ✅ Luôn thêm id DESC vào CUỐI
+            sortList.add(Sort.by(Sort.Order.desc("id")));
+
+            // Gộp lại tất cả
             sortCriteria = sortList.stream()
                     .reduce(Sort::and)
                     .orElse(Sort.unsorted());
         }
+
+
 //        for (String s : sort) {
 //            if ("hasDiscount".equals(s)) {
 //                // Ưu tiên sản phẩm có giảm giá (sản phẩm nào có join với DiscountPeriod thì lên trước)

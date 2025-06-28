@@ -22,6 +22,8 @@ public class BillResponse {
     private BigDecimal total_price;
     private Integer payMethod;
     private String note;
+    private BigDecimal discountShip;
+    private BigDecimal discountUser;
     private LocalDateTime createdDate;
     private UserResponse user;
     private List<BillDetailResponse> billDetail;

@@ -29,6 +29,7 @@ public class ApplicationInitConfig {
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
                         .roles(roles)
+                        .enable(true)
                         .build();
                 usersRepository.save(users);
                 log.warn("admin user has been creates with default");

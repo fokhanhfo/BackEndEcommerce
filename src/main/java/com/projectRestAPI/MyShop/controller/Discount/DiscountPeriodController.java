@@ -34,6 +34,11 @@ public class DiscountPeriodController {
         return discountPeriodService.add(discountPeriod);
     }
 
+    @PutMapping
+    private ResponseEntity<ResponseObject> update(@RequestBody @Valid DiscountPeriod discountPeriod){
+        return discountPeriodService.update(discountPeriod);
+    }
+
     @GetMapping
     public ResponseEntity<?> getAll(){
         List<DiscountPeriod> discountPeriods = discountPeriodRepository.findAll();

@@ -1,6 +1,6 @@
 package com.projectRestAPI.MyShop.repository.custom.RepositoryCustomImpl;
 
-import com.projectRestAPI.MyShop.model.Product;
+import com.projectRestAPI.MyShop.model.SanPham.Product;
 import com.projectRestAPI.MyShop.repository.custom.ProductRepositoryCustom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

@@ -16,4 +16,9 @@ public interface DiscountRepository extends BaseRepository<Discount,Long> {
     @EntityGraph(attributePaths = {"discountUsers.users"})
     @NonNull
     Optional<Discount> findById(@NonNull Long id);
+
+    Optional<Discount> findByDiscountCode(String discountCode);
+
+    boolean existsByDiscountCode(String discountCode);
+
 }

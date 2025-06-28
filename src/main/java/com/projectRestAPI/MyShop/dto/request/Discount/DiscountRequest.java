@@ -39,6 +39,8 @@ public class DiscountRequest {
     @NotNull
     private Integer quantity;
 
+    private Boolean enable;
+
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime startTime;

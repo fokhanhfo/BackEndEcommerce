@@ -34,6 +34,8 @@ public class Discount extends BaseEntity {
     private BigDecimal discountCondition;
     private Integer quantity;
 
+    private Boolean enable;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startTime;
@@ -46,6 +48,8 @@ public class Discount extends BaseEntity {
 
     @OneToMany(mappedBy = "discount", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<DiscountUser> discountUsers;
+
+
 
 
 }

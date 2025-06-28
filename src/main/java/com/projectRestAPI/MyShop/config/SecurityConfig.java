@@ -26,7 +26,11 @@ public class SecurityConfig {
             "/auth/logout",
             "/category/getAll",
             "/auth/refresh",
-            "/auth/facebook-login"
+            "/auth/facebook-login",
+            "/user/verify-otp",
+            "/user/resendOtp",
+            "/user/forgot-password",
+            "/user/confirm-forgot-password",
     };
 
     private final String[] PUBLIC_GET_ENDPOINTS = {
@@ -35,7 +39,12 @@ public class SecurityConfig {
             "/product/{id}",
             "/shop",
             "/image/**",
+            "/userImage/**",
             "/auth/facebook-login"
+    };
+
+    private final String[] PUBLIC_WEBSOCKET_ENDPOINTS = {
+            "/ws/**"
     };
 
     @Autowired
@@ -46,6 +55,7 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(request->
                 request.requestMatchers(HttpMethod.POST,PUBLIC_POST_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET,PUBLIC_GET_ENDPOINTS).permitAll()
+                        .requestMatchers(PUBLIC_WEBSOCKET_ENDPOINTS).permitAll()
                         .anyRequest().authenticated());
 //        httpSecurity.authorizeHttpRequests(request ->
 //                request.anyRequest().permitAll());

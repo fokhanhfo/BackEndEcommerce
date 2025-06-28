@@ -5,17 +5,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.projectRestAPI.MyShop.Exception.AppException;
 import com.projectRestAPI.MyShop.Exception.ErrorCode;
+import com.projectRestAPI.MyShop.dto.ProductStatistics.*;
 import com.projectRestAPI.MyShop.dto.request.ProductDetailRequest;
 import com.projectRestAPI.MyShop.dto.request.ProductDetailSizeRequest;
 import com.projectRestAPI.MyShop.dto.request.ProductRequest;
 import com.projectRestAPI.MyShop.dto.request.SearchCriteria;
 import com.projectRestAPI.MyShop.dto.response.ProductResponse;
+import com.projectRestAPI.MyShop.dto.response.ProductStatisticsResponse;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.enums.StatusProduct;
 import com.projectRestAPI.MyShop.mapper.*;
-import com.projectRestAPI.MyShop.model.Category;
 import com.projectRestAPI.MyShop.model.Image;
-import com.projectRestAPI.MyShop.model.Product;
+import com.projectRestAPI.MyShop.model.SanPham.Product;
 import com.projectRestAPI.MyShop.model.SanPham.Color;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetailSize;
@@ -28,9 +29,11 @@ import com.projectRestAPI.MyShop.service.CategoryService;
 import com.projectRestAPI.MyShop.service.Impl.BaseServiceImpl;
 import com.projectRestAPI.MyShop.service.ProductService;
 import com.projectRestAPI.MyShop.utils.FileUploadUtils;
+import com.projectRestAPI.MyShop.utils.ResponseUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -404,4 +407,18 @@ public class ProductServiceImpl extends BaseServiceImpl<Product , Long , Product
         return fileName;
     }
 
+    @Override
+    public ResponseEntity<ResponseObject> getAllProductStatistics() {
+        List<ProductStatusDTO> statusStats = repository.getProductCountByStatusNative();
+        PageRequest pageRequest = PageRequest.of(0, 1);
+        ProductQuantityView topProduct = repository.findTopProductWithMostQuantity(pageRequest).stream().findFirst().orElse(null);
+        List<ProductQuantityDTO> productQuantityDTOS = repository.findProductWithTotalQuantityLessThanTenNative();
+        ProductSalesView productSalesView = repository.findBestSellingProduct();
+        return ResponseUtil.buildResponse("success","Lấy dữ liệu thành công",1,new ProductStatisticsResponse(
+                statusStats,
+                topProduct,
+                productQuantityDTOS,
+                productSalesView
+        ),HttpStatus.OK);
+    }
 }
