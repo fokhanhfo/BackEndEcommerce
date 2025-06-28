@@ -1,6 +1,7 @@
 package com.projectRestAPI.MyShop.model;
 
 import com.projectRestAPI.MyShop.model.SanPham.Color;
+import com.projectRestAPI.MyShop.model.SanPham.Product;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 
 import jakarta.persistence.*;

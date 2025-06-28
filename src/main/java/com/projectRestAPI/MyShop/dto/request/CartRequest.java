@@ -1,7 +1,10 @@
 package com.projectRestAPI.MyShop.dto.request;
 
 import com.projectRestAPI.MyShop.model.SanPham.Size;
+import jakarta.persistence.Column;
 import lombok.*;
+
+import java.math.BigDecimal;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,6 +19,8 @@ public class CartRequest {
     private SizeRequest size;
 
     private ColorRequest color;
+
+    private BigDecimal discountPrice;
 
     private ProductDetailRequest productDetail;
 

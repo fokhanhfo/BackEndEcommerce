@@ -1,6 +1,8 @@
-package com.projectRestAPI.MyShop.model;
+package com.projectRestAPI.MyShop.model.SanPham;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.projectRestAPI.MyShop.model.BaseEntity;
+import com.projectRestAPI.MyShop.model.Category;
 import com.projectRestAPI.MyShop.model.DiscountPeriod.ProductDiscountPeriod;
 import com.projectRestAPI.MyShop.model.SanPham.ProductDetail;
 import jakarta.persistence.*;
@@ -25,6 +27,11 @@ public class Product extends BaseEntity {
     private String detail;
     @Column(name="status")
     private Integer status;
+
+    @Column(name = "import_price")
+    private BigDecimal importPrice;
+    @Column(name = "selling_price")
+    private BigDecimal sellingPrice;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

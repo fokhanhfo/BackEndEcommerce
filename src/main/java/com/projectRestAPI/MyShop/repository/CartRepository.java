@@ -14,8 +14,8 @@ public interface CartRepository extends BaseRepository<Cart,Long>{
     @Query("SELECT cart FROM Cart cart WHERE cart.user.id = :userId")
     List<Cart> findCartByUser(Long userId);
 
-    @Query("SELECT cart FROM Cart cart WHERE cart.productDetail.id = :productId AND cart.user.id = :userId")
-    Optional<Cart> findCartProduct(@Param("productId") Long productId, @Param("userId") Long userId);
+    @Query("SELECT cart FROM Cart cart WHERE cart.productDetail.id = :productId AND cart.user.id = :userId AND cart.color.id = :colorId and cart.size.id= :sizeId")
+    Optional<Cart> findCartProduct(@Param("productId") Long productId, @Param("userId") Long userId,@Param("colorId") Long colorId,@Param("sizeId") Long sizeId);
 
 
     @Modifying

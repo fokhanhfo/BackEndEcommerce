@@ -2,21 +2,19 @@ package com.projectRestAPI.MyShop.service.Impl.Discount;
 
 import com.projectRestAPI.MyShop.Exception.AppException;
 import com.projectRestAPI.MyShop.Exception.ErrorCode;
-import com.projectRestAPI.MyShop.dto.request.Discount.DiscountRequest;
 import com.projectRestAPI.MyShop.dto.request.Discount.DiscountUserAllRequest;
 import com.projectRestAPI.MyShop.dto.request.Discount.DiscountUserRequest;
 import com.projectRestAPI.MyShop.dto.request.SearchCriteria;
-import com.projectRestAPI.MyShop.dto.request.SizeRequest;
-import com.projectRestAPI.MyShop.dto.response.Discount.DiscountResponse;
 import com.projectRestAPI.MyShop.dto.response.Discount.DiscountUserResponse;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.enums.DiscountStatus;
 import com.projectRestAPI.MyShop.mapper.Discount.DiscountMapper;
 import com.projectRestAPI.MyShop.mapper.Discount.DiscountUserMapper;
-import com.projectRestAPI.MyShop.mapper.UserMapper;
+import com.projectRestAPI.MyShop.mapper.User.UserMapper;
 import com.projectRestAPI.MyShop.model.Discount.Discount;
 import com.projectRestAPI.MyShop.model.Discount.DiscountUser;
 import com.projectRestAPI.MyShop.model.Users;
+import com.projectRestAPI.MyShop.repository.Discount.DiscountRepository;
 import com.projectRestAPI.MyShop.repository.Discount.DiscountUserRepository;
 import com.projectRestAPI.MyShop.service.DiscountUserService;
 import com.projectRestAPI.MyShop.service.Impl.BaseServiceImpl;
@@ -28,11 +26,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Pageable;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +47,9 @@ public class DiscountUserServiceImpl extends BaseServiceImpl<DiscountUser,Long, 
 
     @Autowired
     private UsersService usersService;
+
+    @Autowired
+    private DiscountRepository discountRepository;
 
     @Override
     public ResponseEntity<ResponseObject> add(DiscountUserRequest discountUserRequest) {
@@ -88,6 +88,27 @@ public class DiscountUserServiceImpl extends BaseServiceImpl<DiscountUser,Long, 
 
     @Override
     public ResponseEntity<ResponseObject> addAll(DiscountUserAllRequest discountUserAllRequest) {
+        if (discountUserAllRequest.getDiscount() == null || discountUserAllRequest.getDiscount().getId() == null) {
+            throw new AppException(ErrorCode.DISCOUNT_NOT_FOUND);
+        }
+        Discount discount = discountRepository.findById(discountUserAllRequest.getDiscount().getId())
+                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+        if (discount.getStatus() == null || !discount.getStatus().equals(DiscountStatus.ACTIVE.getValue())) {
+            throw new AppException(ErrorCode.DISCOUNT_INACTIVE);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(discount.getStartTime()) || now.isAfter(discount.getEndTime())) {
+            throw new AppException(ErrorCode.DISCOUNT_EXPIRED);
+        }
+
+        int numUsers = discountUserAllRequest.getUsers().size();
+        if (discount.getQuantity() < numUsers) {
+            throw new AppException(ErrorCode.DISCOUNT_NOT_ENOUGH_QUANTITY);
+        }
+
+        discount.setQuantity(discount.getQuantity() - numUsers);
+
         List<DiscountUser> discountUsers = discountUserAllRequest.getUsers().stream().map((item)->{
             DiscountUser discountUser = DiscountUser.builder()
                     .users(userMapper.toUsers(item))
@@ -97,8 +118,9 @@ public class DiscountUserServiceImpl extends BaseServiceImpl<DiscountUser,Long, 
                     .build();
             return discountUser;
         }).toList();
-        List<DiscountUser> discountUsers1 = repository.saveAll(discountUsers);
-        return ResponseUtil.buildResponse("success","Thêm thành công",1,discountUsers1,HttpStatus.OK);
+        List<DiscountUser> savedDiscountUsers = repository.saveAll(discountUsers);
+        discountRepository.save(discount);
+        return ResponseUtil.buildResponse("success","Thêm thành công",1,null,HttpStatus.OK);
     }
 
     @Override

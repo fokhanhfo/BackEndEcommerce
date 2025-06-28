@@ -31,6 +31,12 @@ public class BillDetail extends BaseEntity{
     @Column(name = "color")
     private String color;
 
+    @Column(name = "selling_price")
+    private BigDecimal sellingPrice;
+
+    @Column(name = "discount_price")
+    private BigDecimal discountPrice;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bill_id")
     private Bill bill;

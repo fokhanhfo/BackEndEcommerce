@@ -26,7 +26,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/product")
@@ -59,13 +61,45 @@ public class ProductController {
                 criteriaList.add(new SearchCriteria("id", "notIn", productsID));
             }
         }
+
+//        if (name != null && !name.trim().isEmpty()) {
+//            String trimmed = name.replaceAll("\\s+", "").toLowerCase();
+//
+//            Set<Character> uniqueChars = trimmed.chars()
+//                    .mapToObj(c -> (char) c)
+//                    .collect(Collectors.toSet());
+//
+//            for (char c : uniqueChars) {
+//                criteriaList.add(new SearchCriteria("name", "charLike", String.valueOf(c)));
+//            }
+//        }
+
+
+
+
 //        ObjectMapper objectMapper = new ObjectMapper();
 //        if(!category.isEmpty()){
 //            Category categoryModel = objectMapper.readValue(category,Category.class);
         SearchCriteriaUtils.addCriteria(criteriaList,"category.id" , ":", category);
 
 //        }
-        SearchCriteriaUtils.addCriteria(criteriaList, "name", "like", name);
+        // Trong Controller
+//        if (name != null && !name.trim().isEmpty()) {
+//            criteriaList.add(new SearchCriteria("id|name", "orLike", name.toLowerCase()));
+//        }
+
+        if (name != null && !name.trim().isEmpty()) {
+            try {
+                Long idValue = Long.parseLong(name);
+                criteriaList.add(new SearchCriteria("id", ":", idValue));
+//                criteriaList.add(new SearchCriteria("name", "orLike", name));
+            } catch (NumberFormatException e) {
+                criteriaList.add(new SearchCriteria("name", "like", name));
+            }
+
+        }
+
+
         SearchCriteriaUtils.addCriteria(criteriaList, "status", ":", status);
 
         List<String> sortParams;
@@ -105,5 +139,9 @@ public class ProductController {
         return productService.updateStatus(id,status);
     }
 
+    @GetMapping("/getAllProductStatistics")
+    public ResponseEntity<?> getAllProductStatistics(){
+        return productService.getAllProductStatistics();
+    }
 
 }

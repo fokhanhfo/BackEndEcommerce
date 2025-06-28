@@ -5,20 +5,12 @@ import com.projectRestAPI.MyShop.dto.request.SizeRequest;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.model.UserImage;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.print.Pageable;
+import java.io.IOException;
 import java.util.List;
 
 public interface UserImageService extends BaseService<UserImage,Long>{
-    ResponseEntity<ResponseObject> add(SizeRequest sizeRequest);
-
-    //    ResponseEntity<ResponseObject> getAll();
-//
-    ResponseEntity<ResponseObject> getId(Long id);
-    //
-    ResponseEntity<ResponseObject> update(SizeRequest sizeRequest);
-    //
-//    ResponseEntity<ResponseObject> updateStatus(Long id,Integer status);
-//
-    ResponseEntity<ResponseObject> getAll(List<SearchCriteria> params, Pageable pageable, List<String> sort);
+    ResponseEntity<?>  getImage(String name) throws IOException;
 }

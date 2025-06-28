@@ -68,8 +68,8 @@ public class BillController {
                                                      @RequestParam(value = "end_date", required = false)
                                                          @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime endDate,
                                                      @RequestParam(value = "sort",required = false) String sort,
-                                                     @RequestParam(value = "search",required = false) Long search,
-                                                     @RequestParam(value = "status",required = false) Integer status ) {
+                                                     @RequestParam(value = "id",required = false) Long id,
+                                                     @RequestParam(value = "status",required = false) String status ) {
 
         // Tạo Pageable
         Pageable pageable = PageRequest.of(page, limit);
@@ -77,8 +77,20 @@ public class BillController {
         List<SearchCriteria> criteriaList = new ArrayList<>();
         SearchCriteriaUtils.addCriteria(criteriaList,"createdDate" , ">", startDate);
         SearchCriteriaUtils.addCriteria(criteriaList, "createdDate", "<", endDate);
-        SearchCriteriaUtils.addCriteria(criteriaList, "id", "like", search);
-        SearchCriteriaUtils.addCriteria(criteriaList, "status", ":", status);
+        if (id != null) {
+                criteriaList.add(new SearchCriteria("id", ":", id));
+
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            List<String> statusList = List.of(status.split(","));
+            if (statusList.size() == 1) {
+                SearchCriteriaUtils.addCriteria(criteriaList, "status", ":", statusList.get(0));
+            } else {
+                SearchCriteriaUtils.addCriteria(criteriaList, "status", "orIn", statusList);
+            }
+        }
+
+
 
         List<String> sortParams;
         if (sort == null || sort.trim().isEmpty()) {
@@ -118,9 +130,26 @@ public class BillController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseObject> updateStatus(@PathVariable Long id,
-                                                       @RequestBody Map<String, Integer> statusMap){
-        Integer status = statusMap.get("status");
-        return billService.UpdateStatus(id,status);
+                                                       @RequestBody Map<String, Object> requestMap){
+        Integer status = (Integer) requestMap.get("status");
+        String note = (String) requestMap.get("note");
+        return billService.UpdateStatus(id,status,note);
+    }
+
+    @GetMapping("/getBillStatistics")
+    public  ResponseEntity<ResponseObject> getBillStatistics(){
+        return billService.billStatistics();
+    }
+
+
+    @GetMapping("/statistic/{year}")
+    public ResponseEntity<ResponseObject> getStatistic(@PathVariable int year) {
+        return billService.getMonthlyStatistics(year);
+    }
+
+    @GetMapping("/revenue/category")
+    public ResponseEntity<ResponseObject> getRevenueByCategory(@RequestParam int year) {
+        return billService.getRevenueByCategory(year);
     }
 
 }

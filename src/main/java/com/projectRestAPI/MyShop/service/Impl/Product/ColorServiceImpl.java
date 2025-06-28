@@ -40,6 +40,14 @@ public class ColorServiceImpl extends BaseServiceImpl<Color,Long, ColorRepositor
 
     @Override
     public ResponseEntity<ResponseObject> add(ColorRequest colorRequest) {
+        Boolean colorBoolean = repository.existsByName(colorRequest.getName());
+        Boolean keyBoolean = repository.existsByKey(colorRequest.getKey());
+        if(colorBoolean){
+            throw new AppException(ErrorCode.COLOR_ALREADY_EXISTS);
+        }
+        if(keyBoolean){
+            throw new AppException(ErrorCode.KEY_COLOR_ALREADY_EXISTS);
+        }
         Color color = colorMapper.toColor(colorRequest);
         return createNew(color);
     }
@@ -61,8 +69,17 @@ public class ColorServiceImpl extends BaseServiceImpl<Color,Long, ColorRepositor
             throw new AppException(ErrorCode.SIZE_NOT_FOUND);
         }
 
-        Color color = colorMapper.toColor(colorRequest);
+        // Kiểm tra trùng tên (khác id)
+        if (repository.existsByNameAndIdNot(colorRequest.getName(), colorRequest.getId())) {
+            throw new AppException(ErrorCode.DUPLICATE_NAME); // bạn tự định nghĩa enum này
+        }
 
+        // Kiểm tra trùng key (khác id)
+//        if (repository.existsByKeyAndIdNot(colorRequest.getKey(), colorRequest.getId())) {
+//            throw new AppException(ErrorCode.DUPLICATE_KEY);
+//        }
+
+        Color color = colorMapper.toColor(colorRequest);
         Color updatedColor = repository.save(color);
 
         return new ResponseEntity<>(new ResponseObject(
@@ -71,6 +88,7 @@ public class ColorServiceImpl extends BaseServiceImpl<Color,Long, ColorRepositor
                 200,
                 colorMapper.toColorResponse(updatedColor)), HttpStatus.OK);
     }
+
 
     @Override
     public ResponseEntity<ResponseObject> getAll(List<SearchCriteria> params, Pageable pageable, List<String> sort) {

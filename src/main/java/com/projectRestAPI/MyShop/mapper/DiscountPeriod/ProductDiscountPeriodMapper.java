@@ -9,11 +9,10 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring",uses = {DiscountPeriodMapper.class, ProductShortDiscountMapper.class})
+@Mapper(componentModel = "spring",uses = {ProductShortDiscountMapper.class, DiscountPeriodProductMapper.class})
 public interface ProductDiscountPeriodMapper {
 //    ProductDiscountPeriod toProductDiscountPeriod(ProductDiscountPeriod productDiscountPeriod);
 
-    @Mapping(target = "discountPeriod" , ignore = true)
     @Mapping(target = "product" , source = "product")
     ProductDiscountPeriodResponse toProductDiscountPeriodResponse(ProductDiscountPeriod productDiscountPeriod);
 

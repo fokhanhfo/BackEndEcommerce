@@ -16,8 +16,6 @@ import lombok.*;
 @Builder
 public class ProductDetailRequest {
     private Long id;
-    private BigDecimal importPrice;
-    private BigDecimal sellingPrice;
     private ProductShortRequest product;
 
     private ColorRequest color;

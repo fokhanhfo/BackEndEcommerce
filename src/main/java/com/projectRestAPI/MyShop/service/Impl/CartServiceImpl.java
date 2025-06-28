@@ -3,10 +3,10 @@ package com.projectRestAPI.MyShop.service.Impl;
 import com.projectRestAPI.MyShop.Exception.AppException;
 import com.projectRestAPI.MyShop.Exception.ErrorCode;
 import com.projectRestAPI.MyShop.dto.request.CartRequest;
-import com.projectRestAPI.MyShop.dto.response.CartResponse;
+import com.projectRestAPI.MyShop.dto.response.CartResponse.CartResponse;
 import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.enums.StatusCart;
-import com.projectRestAPI.MyShop.mapper.CartMapper;
+import com.projectRestAPI.MyShop.mapper.Cart.CartMapper;
 import com.projectRestAPI.MyShop.mapper.ColorMapper;
 import com.projectRestAPI.MyShop.mapper.SizeMapper;
 import com.projectRestAPI.MyShop.model.*;
@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl extends BaseServiceImpl<Cart,Long, CartRepository> implements CartService {
@@ -79,7 +78,7 @@ public class CartServiceImpl extends BaseServiceImpl<Cart,Long, CartRepository> 
     public ResponseEntity<ResponseObject> AddCart(CartRequest cartRequest) {
         Users user = usersService.getUser();
         Optional<ProductDetail> productDetailOptional = productDetailRepository.findById(cartRequest.getProductDetail().getId());
-        Optional<Cart> product_Cart = repository.findCartProduct(cartRequest.getProductDetail().getId(),user.getId());
+        Optional<Cart> product_Cart = repository.findCartProduct(cartRequest.getProductDetail().getId(),user.getId(),cartRequest.getColor().getId(),cartRequest.getSize().getId());
         if (product_Cart.isEmpty() && productDetailOptional.isPresent()) {
             ProductDetail productDetail = productDetailOptional.get();
 //            if(product.getStatus() == 0 ){

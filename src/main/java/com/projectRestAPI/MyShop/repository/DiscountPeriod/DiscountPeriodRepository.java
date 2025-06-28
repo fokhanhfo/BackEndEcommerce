@@ -8,4 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DiscountPeriodRepository extends BaseRepository<DiscountPeriod,Long> {
     Boolean existsByDiscountPeriodCode (String existsByDiscountPeriodCode);
+
+    boolean existsByDiscountPeriodCodeAndIdNot(String code, Long id);
+
 }

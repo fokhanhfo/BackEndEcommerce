@@ -18,5 +18,5 @@ public class ProductDiscountPeriodResponse {
     private Long id;
     private ProductShortDiscountResponse product;
     private Integer percentageValue;
-    private DiscountPeriodResponse discountPeriod;
+    private DiscountPeriodProductResponse discountPeriod;
 }

@@ -62,11 +62,15 @@ public class DiscountPeriodServiceImpl extends BaseServiceImpl<DiscountPeriod,Lo
 
     @Override
     public ResponseEntity<ResponseObject> update(DiscountPeriod discountPeriod) {
-        Optional<DiscountPeriod> discountOptional = findById(discountPeriod.getId());
+        Optional<DiscountPeriod> discountOptional = discountPeriodRepository.findById(discountPeriod.getId());
         if(discountOptional.isEmpty()){
-            throw new AppException(ErrorCode.CART_NOT_FOUND);
+            throw new AppException(ErrorCode.DISCOUNT_PERIOD_NOT_FOUND);
         }
-        return createNew(discountPeriod);
+        if (discountPeriodRepository.existsByDiscountPeriodCodeAndIdNot(discountPeriod.getDiscountPeriodCode(), discountPeriod.getId())) {
+            throw new AppException(ErrorCode.DUPLICATE_DISCOUNT_CODE);
+        }
+        discountPeriodRepository.save(discountPeriod);
+        return ResponseUtil.buildResponse("seccess","Cập nhật dữ liệu thành công",1,null,HttpStatus.OK);
     }
 
     @Override

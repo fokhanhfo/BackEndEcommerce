@@ -10,6 +10,6 @@ import lombok.*;
 @ToString
 public class AuthenticationRequest {
     private String username;
-    @Size(min = 3 ,message = "VALID_PASSWORD")
+//    @Size(min = 3 ,message = "VALID_PASSWORD")
     private String password;
 }

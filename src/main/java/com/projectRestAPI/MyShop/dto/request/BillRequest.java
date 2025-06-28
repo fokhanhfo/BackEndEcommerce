@@ -26,6 +26,10 @@ public class BillRequest {
 
     private BigDecimal total_price;
 
+    private BigDecimal discountShip;
+
+    private BigDecimal discountUser;
+
     private List<Long> discountId;
 
     private List<CartRequest> cartRequests;

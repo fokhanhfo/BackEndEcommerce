@@ -1,14 +1,14 @@
-package com.projectRestAPI.MyShop.mapper;
+package com.projectRestAPI.MyShop.mapper.Cart;
 
 import com.projectRestAPI.MyShop.dto.request.CartRequest;
-import com.projectRestAPI.MyShop.dto.response.CartResponse;
+import com.projectRestAPI.MyShop.dto.response.CartResponse.CartResponse;
+import com.projectRestAPI.MyShop.mapper.ProductDetailMapper;
 import com.projectRestAPI.MyShop.model.Cart;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {ProductDetailMapper.class})
+@Mapper(componentModel = "spring", uses = {ProductDetailCartMapper.class})
 public interface CartMapper {
 //    @Mapping(target = "productDetail.imagesUrl", source = "productDetail.image", qualifiedByName = "mapImageToUrl")
 

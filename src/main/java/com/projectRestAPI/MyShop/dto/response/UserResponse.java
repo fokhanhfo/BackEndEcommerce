@@ -1,6 +1,7 @@
 package com.projectRestAPI.MyShop.dto.response;
 
 import com.projectRestAPI.MyShop.model.Roles;
+import com.projectRestAPI.MyShop.model.UserImage;
 import lombok.*;
 
 import java.util.Date;
@@ -29,4 +30,6 @@ public class UserResponse {
     private String username;
 
     private List<Roles> roles;
+
+    private UserImageResponse userImage;
 }

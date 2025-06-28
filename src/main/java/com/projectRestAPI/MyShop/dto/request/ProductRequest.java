@@ -1,5 +1,6 @@
 package com.projectRestAPI.MyShop.dto.request;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,8 @@ public class ProductRequest {
     private String name;
     @NotBlank(message = "Chi tiết sản phẩm không được để trống")
     private String detail;
+    private BigDecimal importPrice;
+    private BigDecimal sellingPrice;
     @NotNull(message = "Danh mục sản phẩm không được để trống")
     private CategoryRequest category;
     private Integer status;

@@ -1,6 +1,6 @@
 package com.projectRestAPI.MyShop.repository.custom;
 
-import com.projectRestAPI.MyShop.model.Product;
+import com.projectRestAPI.MyShop.model.SanPham.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

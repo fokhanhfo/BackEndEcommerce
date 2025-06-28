@@ -5,6 +5,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -66,5 +67,15 @@ public class GlobalExceptionHandler {
 //                .build();
 //        return ResponseEntity.badRequest().body(responseObject);
 //    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ResponseObject> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
+        ResponseObject responseObject = ResponseObject.builder()
+                .errCode(415)  // HTTP 415 Unsupported Media Type
+                .message("Content-Type không được hỗ trợ: " + ex.getContentType())
+                .status("Error")
+                .build();
+        return ResponseEntity.status(415).body(responseObject);
+    }
 
 }

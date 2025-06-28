@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 public class Bill extends BaseEntity{
     @Column(name = "fullName")
-    private String fullname;
+    private String fullName;
 
     @Column(name = "phone")
     private String phone;
@@ -40,6 +40,12 @@ public class Bill extends BaseEntity{
 
     @Column(name = "total_price")
     private BigDecimal total_price;
+
+    @Column(name = "discount_ship")
+    private BigDecimal discountShip;
+
+    @Column(name = "discount_User")
+    private BigDecimal discountUser;
 
     @Column(name = "created_date", updatable = false)
     private LocalDateTime createdDate;

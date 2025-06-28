@@ -1,6 +1,8 @@
 package com.projectRestAPI.MyShop.dto.response;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -13,4 +15,6 @@ public class BillDetailResponse {
     private Integer quantity;
     private String size;
     private String color;
+    private BigDecimal sellingPrice;
+    private BigDecimal discountPrice;
 }
