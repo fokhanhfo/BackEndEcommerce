@@ -1,5 +1,6 @@
 package com.projectRestAPI.MyShop.model.DiscountPeriod;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.projectRestAPI.MyShop.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -2,6 +2,7 @@ package com.projectRestAPI.MyShop.service.Impl;
 
 import com.projectRestAPI.MyShop.Exception.AppException;
 import com.projectRestAPI.MyShop.Exception.ErrorCode;
+import com.projectRestAPI.MyShop.controller.NotificationController;
 import com.projectRestAPI.MyShop.dto.BillStatistics.MonthlyOrderCount;
 import com.projectRestAPI.MyShop.dto.BillStatistics.MonthlyRevenue;
 import com.projectRestAPI.MyShop.dto.BillStatistics.OrderStatusRatio;
@@ -31,6 +32,7 @@ import com.projectRestAPI.MyShop.repository.Discount.DiscountRepository;
 import com.projectRestAPI.MyShop.repository.Discount.DiscountUserRepository;
 import com.projectRestAPI.MyShop.service.*;
 import com.projectRestAPI.MyShop.utils.ResponseUtil;
+import com.projectRestAPI.MyShop.utils.StatusBillUltil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -93,6 +95,12 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private OtpVerificationRepository otpVerificationRepository;
+
+    @Autowired
+    private NotificationController notificationController;
 
     private final String UrlBase="http://localhost:8080/image/";
     // biến ROLE_NAME cần cho vào aplication
@@ -157,6 +165,18 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
     @Override
     public ResponseEntity<?> saveBill(BillRequest billRequest) {
         Users user = usersService.getUser();
+
+        OtpVerification otpEntity = otpVerificationRepository
+                .findFirstByEmailOrderByExpirationTimeDesc(user.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.OTP_NOT_FOUND));
+
+        if (!otpEntity.getOtp().equals(billRequest.getOtp())) {
+            throw new AppException(ErrorCode.OTP_IS_INCORRECT);
+        }
+
+        if (otpEntity.getExpirationTime().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.OTP_HAS_EXPIRED);
+        }
 
         List<Cart> carts = cartMapper.toListCart(billRequest.getCartRequests());
 
@@ -270,6 +290,7 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
         bill.setDiscountUser(discountUserRef.get());
         bill.setDiscountShip(discountShipRef.get());
         Bill bill1 = repository.save(bill);
+        otpVerificationRepository.delete(otpEntity);
         Notification noti = Notification.builder()
                 .title("Đơn hàng mới")
                 .content("Khách hàng " + user.getUsername() + " đã đặt mua: " + ". Đơn hàng mã " + bill1.getId())
@@ -350,7 +371,8 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
 
     @Override
     public ResponseEntity<ResponseObject> UpdateStatus(Long bill_id, Integer status, String note) {
-        Bill bill = findById(bill_id).orElseThrow(() -> new AppException(ErrorCode.BILL_NOT_FOUND));
+        Bill bill = findById(bill_id)
+                .orElseThrow(() -> new AppException(ErrorCode.BILL_NOT_FOUND));
 
         // Lấy role của người dùng hiện tại
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -359,20 +381,30 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
                 .toList();
 
         boolean isAdmin = roles.contains("ROLE_ADMIN");
+        boolean isStaff = roles.contains("ROLE_STAFF");
+        boolean isUser = roles.contains("ROLE_USER");
         boolean isCancelRequest = Objects.equals(status, StatusBill.CANCELLED.getStatus());
 
-        if (!isAdmin && !isCancelRequest) {
+        // phân quyền:
+        if (isAdmin || isStaff) {
+            // quyền cao nhất, toàn quyền update
+        } else if (isUser) {
+            // user chỉ được phép huỷ đơn
+            if (!isCancelRequest) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+        } else {
+            // role không hợp lệ
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // Nếu là yêu cầu hủy
+        // Nếu là yêu cầu huỷ, trả lại hàng tồn kho
         if (isCancelRequest) {
             List<BillDetail> billDetails = bill.getBillDetail();
             List<ProductDetailSize> productDetailSizes = new ArrayList<>();
 
             for (BillDetail item : billDetails) {
                 ProductDetail productDetail = item.getProductDetail();
-
                 ProductDetailSize productDetailSize = productDetail.getProductDetailSizes().stream()
                         .filter(pds -> pds.getSize().getName().equals(item.getSize()))
                         .findFirst()
@@ -388,15 +420,25 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
             bill.setNote(note);
         }
 
+        // cập nhật trạng thái
         bill.setStatus(status);
         createNew(bill);
-        BillResponse billResponse = mapToResponse(bill);
 
+        BillResponse billResponse = mapToResponse(bill);
+        Notification notification = Notification.builder()
+                .title("Cập nhật trạng thái đơn hàng")
+                .content("Đơn hàng #" + bill.getId() + " đã chuyển trạng thái sang " + StatusBillUltil.getStatusDescription(status))
+                .createdAt(LocalDateTime.now())
+                .recipient(bill.getUser().getUsername()) // giả sử Bill có getUser()
+                .build();
+        notificationRepository.save(notification);
+        notificationController.sendNotification(notification.getRecipient(), notification);
         return new ResponseEntity<>(
                 new ResponseObject("Success", "Cập nhật trạng thái hóa đơn thành công", 200, billResponse),
                 HttpStatus.OK
         );
     }
+
 
 
     private BillDetail saveBillDetail(Bill bill, CartRequest cartRequest) {
@@ -410,11 +452,16 @@ public class BillServiceImpl extends BaseServiceImpl<Bill,Long, BillRepository> 
 
         BigDecimal sellingPrice = product.getSellingPrice();
         ProductDiscountPeriod discount = product.getProductDiscountPeriods().stream()
-                .reduce((max, current) -> {
-                    return current.getPercentageValue() > max.getPercentageValue()
-                            ? current
-                            : max;
+                .filter((productDiscountPeriod) -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime startTime = productDiscountPeriod.getDiscountPeriod().getStartTime();
+                    LocalDateTime endTime = productDiscountPeriod.getDiscountPeriod().getEndTime();
+                    Integer status = productDiscountPeriod.getDiscountPeriod().getStatus();
+                    return (startTime.isBefore(now) || startTime.isEqual(now))
+                            && (endTime.isAfter(now) || endTime.isEqual(now))
+                            && status == DiscountStatus.ACTIVE.ordinal();
                 })
+                .reduce((max, current) -> current.getPercentageValue() > max.getPercentageValue() ? current : max)
                 .orElse(null);
         BigDecimal finalPrice;
         if (discount != null && discount.getPercentageValue() != null) {

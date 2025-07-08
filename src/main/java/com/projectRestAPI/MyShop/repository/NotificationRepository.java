@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends BaseRepository<Notification,Long>{
+    List<Notification> findByRecipient(String recipient);
     List<Notification> findByRecipientAndIsReadFalse(String recipient);
 }

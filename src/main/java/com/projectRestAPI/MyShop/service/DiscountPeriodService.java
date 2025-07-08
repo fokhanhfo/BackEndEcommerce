@@ -17,5 +17,7 @@ public interface DiscountPeriodService extends BaseService<DiscountPeriod,Long>{
 
     ResponseEntity<ResponseObject> update(DiscountPeriod discountPeriod);
 
+    ResponseEntity<ResponseObject> deleteDiscountPeriod(Long id);
+
     ResponseEntity<ResponseObject> getAll(List<SearchCriteria> params, Pageable pageable, List<String> sort);
 }

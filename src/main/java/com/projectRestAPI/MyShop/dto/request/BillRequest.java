@@ -32,5 +32,7 @@ public class BillRequest {
 
     private List<Long> discountId;
 
+    private String otp;
+
     private List<CartRequest> cartRequests;
 }

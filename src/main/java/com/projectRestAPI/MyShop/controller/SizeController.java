@@ -36,5 +36,4 @@ public class SizeController {
         return sizeService.update(sizeRequest);
     }
 
-
 }

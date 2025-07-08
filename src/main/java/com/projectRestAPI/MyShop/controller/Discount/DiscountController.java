@@ -117,7 +117,7 @@ public class DiscountController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id){
-        return discountService.delete(id);
+        return discountService.deleteDiscount(id);
     }
 
     @PutMapping
