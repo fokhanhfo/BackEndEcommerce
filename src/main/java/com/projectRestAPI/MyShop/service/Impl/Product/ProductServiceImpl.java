@@ -243,8 +243,7 @@ public class ProductServiceImpl extends BaseServiceImpl<Product , Long , Product
         Product product = findById(id).orElseThrow(()->new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         product.setStatus(status);
         createNew(product);
-        ProductResponse productResponse = mapToResponse(product);
-        return new ResponseEntity<>(new ResponseObject("Succes","Update trạng thái sản phẩm thành công",200,productResponse), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseObject("Succes","Update trạng thái sản phẩm thành công",200,null), HttpStatus.OK);
     }
 
     @Override

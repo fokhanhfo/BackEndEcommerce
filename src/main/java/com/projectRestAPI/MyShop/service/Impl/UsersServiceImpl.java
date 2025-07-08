@@ -210,10 +210,20 @@ public class UsersServiceImpl extends BaseServiceImpl<Users,Long, UsersRepositor
         if(userRequest.getGender() != null){
             existingUser.setGender(userRequest.getGender());
         }
-        existingUser.setDiscountUsers(existingUser.getDiscountUsers());
-        existingUser.setEnable(existingUser.getEnable());
+        if (userRequest.getPhone() != null){
+            existingUser.setPhone(userRequest.getPhone());
+        }
         if(userRequest.getBirthday() != null){
             existingUser.setBirthday(userRequest.getBirthday());
+        }
+        List<Roles> roles = new ArrayList<>();
+        for (int i=0 ; i < userRequest.getRoles().size() ; i++){
+            roles.add(rolesRepository.findById(userRequest.getRoles().get(i).getId()).orElseThrow(()->
+                    new AppException(ErrorCode.BAD_REQUEST)
+            ));
+        }
+        if(isAdmin){
+            existingUser.setRoles(roles);
         }
 
         repository.save(existingUser);
@@ -525,6 +535,7 @@ public class UsersServiceImpl extends BaseServiceImpl<Users,Long, UsersRepositor
             case "ORDER_CONFIRM" -> "Xác nhận đơn hàng bằng OTP";
             case "CHANGE_EMAIL" -> "Xác nhận thay đổi email";
             case "CHANGE_PHONE" -> "Xác nhận thay đổi số điện thoại";
+            case "ORDER" -> "Xác nhận mua hàng";
             default -> "Mã OTP xác thực";
         };
 

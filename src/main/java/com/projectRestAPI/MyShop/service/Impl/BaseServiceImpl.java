@@ -90,9 +90,12 @@ public class BaseServiceImpl<E extends BaseEntity,ID extends Serializable,R exte
 
         if(users != null){
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            boolean isAdmin = authentication.getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-            if(!isAdmin){
+            boolean isAdminOrStaff = authentication.getAuthorities().stream()
+                    .anyMatch(grantedAuthority ->
+                            grantedAuthority.getAuthority().equals("ROLE_ADMIN") ||
+                                    grantedAuthority.getAuthority().equals("ROLE_STAFF")
+                    );
+            if(!isAdminOrStaff){
                 SearchCriteria userCriteria = new SearchCriteria("user", ":", users);
                 params.add(userCriteria);
             }

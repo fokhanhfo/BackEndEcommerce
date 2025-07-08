@@ -52,6 +52,11 @@ public class DiscountPeriodController {
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable("id") Long id){
+        return discountPeriodService.deleteDiscountPeriod(id);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getId(@PathVariable("id") Long id){
         return discountPeriodService.getId(id);

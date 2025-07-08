@@ -18,7 +18,7 @@ public interface DiscountService extends BaseService<Discount,Long> {
     //
     ResponseEntity<ResponseObject> update(DiscountRequest discountRequest);
     //
-//    ResponseEntity<ResponseObject> updateStatus(Long id,Integer status);
+    ResponseEntity<ResponseObject> deleteDiscount(Long id);
 //
     ResponseEntity<ResponseObject> getAll(List<SearchCriteria> params, Pageable pageable, List<String> sort);
 

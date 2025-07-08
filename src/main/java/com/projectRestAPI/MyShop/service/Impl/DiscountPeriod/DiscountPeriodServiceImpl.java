@@ -79,6 +79,18 @@ public class DiscountPeriodServiceImpl extends BaseServiceImpl<DiscountPeriod,Lo
     }
 
     @Override
+    public ResponseEntity<ResponseObject> deleteDiscountPeriod(Long id){
+        Optional<DiscountPeriod> otp = discountPeriodRepository.findById(id);
+        if (otp.isEmpty()) {
+            return new ResponseEntity<>(new ResponseObject("error", "Không Tìm Thấy ID",1,null), HttpStatus.BAD_REQUEST);
+        }
+
+        discountPeriodRepository.deleteById(id);
+        return new ResponseEntity<>(new ResponseObject("success", "Đã Xóa Thành Công", 0, null), HttpStatus.OK);
+    }
+
+
+    @Override
     public void setRepository(DiscountPeriodRepository repository) {
         super.setRepository(repository);
     }

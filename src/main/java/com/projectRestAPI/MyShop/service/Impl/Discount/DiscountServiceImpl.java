@@ -9,6 +9,7 @@ import com.projectRestAPI.MyShop.dto.response.ResponseObject;
 import com.projectRestAPI.MyShop.mapper.Discount.DiscountMapper;
 import com.projectRestAPI.MyShop.mapper.Discount.DiscountShortMapper;
 import com.projectRestAPI.MyShop.model.Discount.Discount;
+import com.projectRestAPI.MyShop.model.DiscountPeriod.DiscountPeriod;
 import com.projectRestAPI.MyShop.model.SanPham.Product;
 import com.projectRestAPI.MyShop.model.SanPham.Size;
 import com.projectRestAPI.MyShop.model.Users;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +35,9 @@ public class DiscountServiceImpl extends BaseServiceImpl<Discount,Long, Discount
     private DiscountMapper discountMapper;
     @Autowired
     private DiscountShortMapper discountShortMapper;
+
+    @Autowired
+    private DiscountRepository discountRepository;
 
     @Autowired
     private UsersService usersService;
@@ -123,5 +128,17 @@ public class DiscountServiceImpl extends BaseServiceImpl<Discount,Long, Discount
     public ResponseEntity<ResponseObject> getAllUser() {
         Users users = usersService.getUser();
         return null;
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<ResponseObject> deleteDiscount(Long id) {
+        Optional<Discount> otp = discountRepository.findById(id);
+        if (otp.isEmpty()) {
+            return new ResponseEntity<>(new ResponseObject("error", "Không Tìm Thấy ID",1,null), HttpStatus.BAD_REQUEST);
+        }
+
+        discountRepository.deleteDiscountById(id);
+        return new ResponseEntity<>(new ResponseObject("success", "Đã Xóa Thành Công", 0, null), HttpStatus.OK);
     }
 }

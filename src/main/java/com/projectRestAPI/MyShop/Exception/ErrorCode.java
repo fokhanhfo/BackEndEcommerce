@@ -77,6 +77,9 @@ public enum ErrorCode {
     OTP_HAS_EXPIRED(400,"OTP đã hết hạn.",HttpStatus.BAD_REQUEST),
     OTP_PURPOSE_INVALID(400, "Mục đích xác thực OTP không hợp lệ.", HttpStatus.BAD_REQUEST),
 
+    //ShippingAddress
+    ShippingAddress_NOT_FOUND(404, "Địa chỉ giao hàng không tồn tại", HttpStatus.NOT_FOUND),
+    MAX_SHIPPING_ADDRESS_REACHED(400, "Chỉ được có 4 địa chỉ giao hàng", HttpStatus.BAD_REQUEST),
 
     ;
     private int code;
