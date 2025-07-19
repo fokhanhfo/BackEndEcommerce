@@ -318,7 +318,7 @@ public class ProductServiceImpl extends BaseServiceImpl<Product , Long , Product
                         .name(fileName)
                         .type(fileType)
                         .product(product)
-                        .productDetail(detail) // Gán tạm, lưu sau nếu detail chưa có ID
+                        .productDetail(detail)
                         .color(color)
                         .mainColor(StringUtils.hasText(productDetailRequest.getIsMainIdNew()))
                         .build();
