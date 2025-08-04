@@ -1,5 +1,6 @@
 package com.projectRestAPI.MyShop.dto.request;
 
+import jakarta.validation.constraints.Past;
 import lombok.*;
 
 import java.util.Date;
@@ -15,6 +16,7 @@ public class UserRequest {
     private Long id;
     private String fullName;
 
+    @Past(message = "Ngày sinh phải là một ngày trong quá khứ")
     private Date birthday;
 
     private Boolean gender;
